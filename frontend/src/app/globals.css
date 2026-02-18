@@ -1,0 +1,234 @@
+/* frontend/src/app/globals.css */
+@import "tailwindcss";
+
+/* ─── Custom Design Tokens (Tailwind v4 @theme) ─────────────── */
+@theme inline {
+  --color-primary: #6d28d9;
+  --color-primary-hover: #5b21b6;
+  --color-accent: #f59e0b;
+  --color-success: #10b981;
+  --color-danger: #ef4444;
+  --color-surface: #ffffff;
+  --color-bg: #f5f3ff;
+  --color-text: #1e1b4b;
+  --color-muted: #6b7280;
+  --font-sans: "Inter", system-ui, sans-serif;
+}
+
+/* ─── Base Resets ────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.6;
+}
+
+/* ─── Hero Section Gradient ──────────────────────────────── */
+.hero-gradient {
+  background: linear-gradient(135deg, #6d28d9 0%, #4f46e5 50%, #7c3aed 100%);
+}
+
+/* ─── Concert card lift on hover ─────────────────────────── */
+.concert-card {
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.concert-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 32px rgba(109, 40, 217, 0.12);
+}
+
+/* ─── Responsive Navbar (Custom CSS) ─────────────────────── */
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .nav-links {
+    display: none;
+  }
+
+  .nav-links.open {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    position: absolute;
+    top: 64px;
+    left: 0;
+    right: 0;
+    background: #ffffff;
+    padding: 1rem 1.5rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    z-index: 50;
+    gap: 0.75rem;
+  }
+}
+
+/* ─── Responsive Table (hide on mobile, show cards) ─────── */
+@media (max-width: 768px) {
+  .desktop-table {
+    display: none;
+  }
+  .mobile-cards {
+    display: block;
+  }
+}
+@media (min-width: 769px) {
+  .desktop-table {
+    display: table;
+  }
+  .mobile-cards {
+    display: none;
+  }
+}
+
+/* ─── Loading skeleton animation ────────────────────────── */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: 0.5rem;
+}
+
+/* ─── Reusable Component Classes (Tailwind v4 @utility) ──── */
+@utility btn-primary {
+  background-color: var(--color-primary);
+  color: white;
+  font-weight: 600;
+  padding: 0.625rem 1.5rem;
+  border-radius: 0.75rem;
+  transition: all 0.2s;
+  outline: none;
+  cursor: pointer;
+  border: none;
+
+  &:hover {
+    background-color: var(--color-primary-hover);
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 2px white, 0 0 0 4px var(--color-primary);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+@utility btn-secondary {
+  background-color: white;
+  color: var(--color-primary);
+  font-weight: 600;
+  padding: 0.625rem 1.5rem;
+  border-radius: 0.75rem;
+  border: 1px solid #ddd6fe;
+  transition: all 0.2s;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #f5f3ff;
+  }
+}
+
+@utility btn-danger {
+  background-color: var(--color-danger);
+  color: white;
+  font-weight: 600;
+  padding: 0.625rem 1.5rem;
+  border-radius: 0.75rem;
+  transition: all 0.2s;
+  cursor: pointer;
+  border: none;
+
+  &:hover {
+    background-color: #dc2626;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+@utility card {
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 4px 24px rgba(109, 40, 217, 0.08);
+  border: 1px solid #ede9fe;
+  padding: 1.5rem;
+  transition: box-shadow 0.2s;
+
+  &:hover {
+    box-shadow: 0 8px 32px rgba(109, 40, 217, 0.12);
+  }
+}
+
+@utility input {
+  width: 100%;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 0.625rem 1rem;
+  outline: none;
+  color: #1f2937;
+  background: white;
+
+  &:focus {
+    box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.4);
+  }
+}
+
+@utility badge-available {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #047857;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  padding: 0.125rem 0.625rem;
+  border-radius: 9999px;
+}
+
+@utility badge-soldout {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #dc2626;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  padding: 0.125rem 0.625rem;
+  border-radius: 9999px;
+}
+
+@utility badge-cancelled {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  padding: 0.125rem 0.625rem;
+  border-radius: 9999px;
+}
