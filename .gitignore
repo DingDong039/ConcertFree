@@ -63,5 +63,10 @@ next-env.d.ts
 .vscode/
 
 # AI
+.CLAUDE.md
 .claude/
+.kilocode/
+.kiro/
+.agents/
+.agent/
 plans/

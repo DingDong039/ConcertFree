@@ -8,6 +8,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { ConcertsModule } from './modules/concerts/concerts.module';
 import { ReservationsModule } from './modules/reservations/reservations.module';
+import { HealthModule } from './modules/health/health.module';
 import { GlobalExceptionFilter } from './common/filters/http-exception.filter';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 
@@ -37,6 +38,7 @@ import { ResponseInterceptor } from './common/interceptors/response.interceptor'
     UsersModule,
     ConcertsModule,
     ReservationsModule,
+    HealthModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: GlobalExceptionFilter },
