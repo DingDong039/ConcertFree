@@ -63,7 +63,7 @@ next-env.d.ts
 .vscode/
 
 # AI
-.CLAUDE.md
+CLAUDE.md
 .claude/
 .kilocode/
 .kiro/
