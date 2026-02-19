@@ -7,8 +7,11 @@ import {
   Delete,
   Param,
   Body,
+  Query,
   UseGuards,
   ParseUUIDPipe,
+  ParseIntPipe,
+  DefaultValuePipe,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
@@ -24,7 +27,14 @@ export class ConcertsController {
   constructor(private readonly concertsService: ConcertsService) {}
 
   @Get()
-  findAll() {
+  findAll(
+    @Query('page', new DefaultValuePipe(0), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(0), ParseIntPipe) limit: number,
+  ) {
+    // ถ้ามี page/limit ส่งมา → paginated, ไม่มี → คืนทั้งหมด
+    if (page > 0 && limit > 0) {
+      return this.concertsService.findPaginated(page, limit);
+    }
     return this.concertsService.findAll();
   }
 

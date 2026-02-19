@@ -23,6 +23,17 @@ export class ConcertsRepository {
     return this.repo.find({ order: { createdAt: 'DESC' } });
   }
 
+  async findPaginated(
+    page: number,
+    limit: number,
+  ): Promise<[Concert[], number]> {
+    return this.repo.findAndCount({
+      order: { createdAt: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+  }
+
   async findById(id: string): Promise<Concert | null> {
     return this.repo.findOne({ where: { id } });
   }

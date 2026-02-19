@@ -24,6 +24,22 @@ export class ConcertsService {
     return this.concertsRepository.findAll();
   }
 
+  async findPaginated(
+    page: number,
+    limit: number,
+  ): Promise<{ data: Concert[]; total: number; page: number; limit: number }> {
+    const [data, total] = await this.concertsRepository.findPaginated(
+      page,
+      limit,
+    );
+    return {
+      data,
+      total,
+      page,
+      limit,
+    };
+  }
+
   async findOne(id: string): Promise<Concert> {
     const concert = await this.concertsRepository.findById(id);
     if (!concert) throw new NotFoundException(`Concert #${id} not found`);

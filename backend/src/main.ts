@@ -1,12 +1,17 @@
 // backend/src/main.ts
 import { NestFactory, Reflector } from '@nestjs/core';
 import { ValidationPipe, ClassSerializerInterceptor } from '@nestjs/common';
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const compression = require('compression') as typeof import('compression');
 import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.setGlobalPrefix('api/v1');
+
+  // Response compression — gzip all responses to reduce bandwidth
+  app.use(compression());
 
   app.enableCors({
     origin: process.env.FRONTEND_URL || 'http://localhost:3000',

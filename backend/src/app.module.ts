@@ -2,7 +2,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { APP_FILTER, APP_INTERCEPTOR, APP_GUARD } from '@nestjs/core';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { ConcertsModule } from './modules/concerts/concerts.module';
@@ -13,6 +14,9 @@ import { ResponseInterceptor } from './common/interceptors/response.interceptor'
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+
+    // Rate limiting — max 100 requests per IP per 60s
+    ThrottlerModule.forRoot([{ ttl: 60_000, limit: 100 }]),
 
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -37,6 +41,7 @@ import { ResponseInterceptor } from './common/interceptors/response.interceptor'
   providers: [
     { provide: APP_FILTER, useClass: GlobalExceptionFilter },
     { provide: APP_INTERCEPTOR, useClass: ResponseInterceptor },
+    { provide: APP_GUARD, useClass: ThrottlerGuard }, // global rate limit
   ],
 })
 export class AppModule {}
