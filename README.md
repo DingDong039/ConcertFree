@@ -95,6 +95,45 @@ JWT_EXPIRES_IN=7d
 FRONTEND_URL=http://localhost:3000
 ```
 
+### 3.1 Database Setup (Migrations & Seeding)
+
+```bash
+cd backend
+
+# Run migrations to create tables
+npm run migration:run
+
+# (Optional) Seed mock data for development
+npm run db:seed
+```
+
+<details>
+<summary>📊 Available Migration Commands</summary>
+
+```bash
+npm run migration:run      # Apply pending migrations
+npm run migration:revert   # Undo last migration
+npm run migration:show     # Show migration status
+npm run db:seed            # Seed development data
+npm run db:seed:sql        # Seed using raw SQL (psql)
+npm run db:reset           # Revert + re-run migrations
+```
+
+</details>
+
+<details>
+<summary>👤 Test Accounts (after seeding)</summary>
+
+| Email | Role | Password |
+|-------|------|----------|
+| `admin@ticketshop.com` | admin | `password123` |
+| `john.doe@email.com` | user | `password123` |
+| `jane.smith@email.com` | user | `password123` |
+| `mike.wilson@email.com` | user | `password123` |
+| ... | user | `password123` |
+
+</details>
+
 ### 4. Frontend
 
 ```bash
@@ -106,6 +145,79 @@ npm run dev               # → http://localhost:3000
 **Environment variables** (`.env.local`):
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:4000/api/v1
+```
+
+---
+
+## 🗄️ Database Migrations & Seeding
+
+### Migration Commands
+
+```bash
+cd backend
+
+# Apply pending migrations
+npm run migration:run
+
+# Revert last migration
+npm run migration:revert
+
+# Show migration status
+npm run migration:show
+
+# Generate new migration (after entity changes)
+npm run migration:generate -- src/database/migrations/MigrationName
+
+# Create empty migration manually
+npm run migration:create -- src/database/migrations/MigrationName
+```
+
+### Seeding Development Data
+
+```bash
+cd backend
+
+# Run TypeScript seed script (recommended)
+npm run db:seed
+
+# Or run SQL directly with psql
+npm run db:seed:sql
+```
+
+### Seed Data Contents
+
+After running `npm run db:seed`, you'll have:
+
+| Type | Count | Description |
+|------|-------|-------------|
+| **Users** | 8 | 1 admin + 7 regular users |
+| **Concerts** | 15 | International & Thai artists |
+| **Reservations** | 15 | 13 active + 2 cancelled |
+
+**Test Accounts** (all use password: `password123`):
+
+| Email | Role |
+|-------|------|
+| `admin@ticketshop.com` | admin |
+| `john.doe@email.com` | user |
+| `jane.smith@email.com` | user |
+| `mike.wilson@email.com` | user |
+| `sarah.johnson@email.com` | user |
+
+### Database Schema
+
+```
+┌─────────────┐       ┌──────────────────┐       ┌─────────────┐
+│    users    │       │   reservations   │       │  concerts   │
+├─────────────┤       ├──────────────────┤       ├─────────────┤
+│ id (UUID)   │◄──────│ userId (FK)      │───────►│ id (UUID)   │
+│ email       │       │ concertId (FK)   │       │ name        │
+│ name        │       │ status (enum)    │       │ description │
+│ password    │       │ createdAt        │       │ totalSeats  │
+│ role (enum) │       │ updatedAt        │       │ available   │
+│ createdAt   │       └──────────────────┘       │ createdAt   │
+│ updatedAt   │                                  │ updatedAt   │
+└─────────────┘                                  └─────────────┘
 ```
 
 ---
@@ -209,11 +321,18 @@ GET    /api/v1/reservations           All reservations (Admin)
 
 ---
 
-## 🔑 Default Admin Account
+## 🔑 Admin Account
 
-To create an admin, register normally then update the role in DB:
+After running `npm run db:seed`, use these credentials:
+
+```text
+Email:    admin@ticketshop.com
+Password: password123
+```
+
+To create a new admin manually:
 ```sql
-UPDATE users SET role = 'admin' WHERE email = 'admin@example.com';
+UPDATE users SET role = 'admin' WHERE email = 'your-email@example.com';
 ```
 
 ---
