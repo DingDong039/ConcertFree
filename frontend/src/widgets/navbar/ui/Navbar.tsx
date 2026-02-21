@@ -1,13 +1,10 @@
-// frontend/src/widgets/navbar/ui/Navbar.tsx
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   Menu,
-  X,
-  User,
   LogOut,
   Music,
   Ticket,
@@ -15,7 +12,7 @@ import {
   LayoutDashboard,
   Moon,
   Sun,
-} from 'lucide-react';
+} from "lucide-react";
 import {
   Button,
   Sheet,
@@ -32,15 +29,24 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/shared/ui';
-import { useAuthStore, useIsAuthenticated, useIsAdmin } from '@/features/auth';
-import { ROUTES, APP_NAME } from '@/shared/config';
-import { cn } from '@/shared/lib';
+} from "@/shared/ui";
+import { useAuthStore, useIsAuthenticated, useIsAdmin } from "@/features/auth";
+import { ROUTES, APP_NAME } from "@/shared/config";
+import { cn } from "@/shared/lib";
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof window === "undefined") {
+      return false; // Default to light on server-side rendering
+    }
+    const savedTheme = localStorage.getItem("theme");
+    const prefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)",
+    ).matches;
+    return savedTheme === "dark" || (!savedTheme && prefersDark);
+  });
   const pathname = usePathname();
   const isAuthenticated = useIsAuthenticated();
   const isAdmin = useIsAdmin();
@@ -52,34 +58,28 @@ export function Navbar() {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
     };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Initialize dark mode from localStorage
+  // Update DOM class safely
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const shouldBeDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
-
-    setIsDark(shouldBeDark);
-    if (shouldBeDark) {
-      document.documentElement.classList.add('dark');
+    if (isDark) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
     }
-  }, []);
+  }, [isDark]);
 
   const toggleTheme = () => {
     const newIsDark = !isDark;
     setIsDark(newIsDark);
     if (newIsDark) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
+      localStorage.setItem("theme", "dark");
     } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
+      localStorage.setItem("theme", "light");
     }
   };
-
   const handleLogout = () => {
     logout();
     setIsOpen(false);
@@ -87,12 +87,16 @@ export function Navbar() {
 
   const navLinks = isAuthenticated
     ? [
-        { href: ROUTES.CONCERTS, label: 'Concerts', icon: Music },
-        { href: ROUTES.RESERVATIONS_ME, label: 'My Tickets', icon: Ticket },
+        { href: ROUTES.CONCERTS, label: "Concerts", icon: Music },
+        { href: ROUTES.RESERVATIONS_ME, label: "My Tickets", icon: Ticket },
         ...(isAdmin
           ? [
-              { href: ROUTES.ADMIN_CONCERTS, label: 'Manage', icon: Settings },
-              { href: ROUTES.ADMIN_RESERVATIONS, label: 'Dashboard', icon: LayoutDashboard },
+              { href: ROUTES.ADMIN_CONCERTS, label: "Manage", icon: Settings },
+              {
+                href: ROUTES.ADMIN_RESERVATIONS,
+                label: "Dashboard",
+                icon: LayoutDashboard,
+              },
             ]
           : []),
       ]
@@ -103,10 +107,10 @@ export function Navbar() {
   return (
     <header
       className={cn(
-        'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
         isScrolled
-          ? 'bg-white/90 dark:bg-slate-900/90 backdrop-blur-md shadow-lg'
-          : 'bg-white dark:bg-slate-900'
+          ? "bg-white/90 dark:bg-slate-900/90 backdrop-blur-md shadow-lg"
+          : "bg-white dark:bg-slate-900",
       )}
     >
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -116,7 +120,6 @@ export function Navbar() {
             href={ROUTES.HOME}
             className="flex items-center gap-2 text-xl font-bold text-primary hover:text-primary/80 transition-colors"
           >
-            <Music className="w-6 h-6" />
             <span className="font-heading">{APP_NAME}</span>
           </Link>
 
@@ -129,10 +132,10 @@ export function Navbar() {
                   key={link.href}
                   href={link.href}
                   className={cn(
-                    'flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200',
+                    "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200",
                     isActiveLink(link.href)
-                      ? 'bg-primary text-white'
-                      : 'text-muted-foreground hover:text-primary hover:bg-primary/10'
+                      ? "bg-primary text-white"
+                      : "text-muted-foreground hover:text-primary hover:bg-primary/10",
                   )}
                 >
                   <Icon className="w-4 h-4" />
@@ -152,19 +155,20 @@ export function Navbar() {
               className="rounded-full"
               aria-label="Toggle theme"
             >
-              {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              {isDark ? (
+                <Sun className="w-5 h-5" />
+              ) : (
+                <Moon className="w-5 h-5" />
+              )}
             </Button>
 
             {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="rounded-full gap-2 px-2"
-                  >
+                  <Button variant="ghost" className="rounded-full gap-2 px-2">
                     <Avatar className="w-8 h-8">
                       <AvatarFallback className="bg-primary text-primary-foreground text-sm">
-                        {user?.name?.charAt(0).toUpperCase() || 'U'}
+                        {user?.name?.charAt(0).toUpperCase() || "U"}
                       </AvatarFallback>
                     </Avatar>
                     <span className="hidden lg:inline">{user?.name}</span>
@@ -180,7 +184,10 @@ export function Navbar() {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+                  <DropdownMenuItem
+                    onClick={handleLogout}
+                    className="cursor-pointer"
+                  >
                     <LogOut className="w-4 h-4 mr-2" />
                     Logout
                   </DropdownMenuItem>
@@ -211,7 +218,11 @@ export function Navbar() {
               className="rounded-full"
               aria-label="Toggle theme"
             >
-              {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              {isDark ? (
+                <Sun className="w-5 h-5" />
+              ) : (
+                <Moon className="w-5 h-5" />
+              )}
             </Button>
 
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -236,12 +247,14 @@ export function Navbar() {
                       <div className="flex items-center gap-3 p-3 rounded-lg bg-muted">
                         <Avatar className="w-10 h-10">
                           <AvatarFallback className="bg-primary text-primary-foreground">
-                            {user?.name?.charAt(0).toUpperCase() || 'U'}
+                            {user?.name?.charAt(0).toUpperCase() || "U"}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex flex-col">
                           <span className="font-medium">{user?.name}</span>
-                          <span className="text-xs text-muted-foreground">{user?.email}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {user?.email}
+                          </span>
                         </div>
                       </div>
 
@@ -256,10 +269,10 @@ export function Navbar() {
                             href={link.href}
                             onClick={() => setIsOpen(false)}
                             className={cn(
-                              'flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer',
+                              "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer",
                               isActiveLink(link.href)
-                                ? 'bg-primary text-white'
-                                : 'hover:bg-muted text-foreground'
+                                ? "bg-primary text-white"
+                                : "hover:bg-muted text-foreground",
                             )}
                           >
                             <Icon className="w-5 h-5" />
@@ -281,12 +294,18 @@ export function Navbar() {
                     </>
                   ) : (
                     <>
-                      <Link href={ROUTES.LOGIN} onClick={() => setIsOpen(false)}>
+                      <Link
+                        href={ROUTES.LOGIN}
+                        onClick={() => setIsOpen(false)}
+                      >
                         <Button variant="outline" className="w-full rounded-lg">
                           Sign In
                         </Button>
                       </Link>
-                      <Link href={ROUTES.REGISTER} onClick={() => setIsOpen(false)}>
+                      <Link
+                        href={ROUTES.REGISTER}
+                        onClick={() => setIsOpen(false)}
+                      >
                         <Button className="w-full rounded-lg bg-cta hover:bg-cta-hover text-white">
                           Sign Up
                         </Button>

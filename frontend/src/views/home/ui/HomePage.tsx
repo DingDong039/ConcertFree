@@ -1,8 +1,7 @@
 // frontend/src/views/home/ui/HomePage.tsx
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
+import Link from "next/link";
 import {
   Ticket,
   Shield,
@@ -12,31 +11,27 @@ import {
   Users,
   ChevronRight,
   Star,
-} from 'lucide-react';
-import { Button, Card, CardContent, Skeleton } from '@/shared/ui';
-import { useIsAuthenticated } from '@/features/auth';
-import { ROUTES, APP_NAME } from '@/shared/config';
-import { concertApi, type Concert } from '@/entities/concert';
-import { ConcertCard } from '@/widgets/concert-card';
+} from "lucide-react";
+import {
+  Button,
+  Card,
+  CardContent,
+  Skeleton,
+  InteractiveLogo,
+  IsometricTransaction,
+  IsometricStage,
+} from "@/shared/ui";
+import { useIsAuthenticated } from "@/features/auth";
+import { ROUTES, APP_NAME } from "@/shared/config";
+import { type Concert } from "@/entities/concert";
+import { ConcertCard } from "@/widgets/concert-card";
+import useSWR from "swr";
+import { fetcher } from "@/shared/api";
 
 export function HomePage() {
   const isAuthenticated = useIsAuthenticated();
-  const [featuredConcerts, setFeaturedConcerts] = useState<Concert[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchFeatured = async () => {
-      try {
-        const data = await concertApi.getAll();
-        setFeaturedConcerts(data.slice(0, 3));
-      } catch {
-        // Silently fail for featured section
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchFeatured();
-  }, []);
+  const { data: concerts, isLoading } = useSWR<Concert[]>("/concerts", fetcher);
+  const featuredConcerts = concerts?.slice(0, 3) || [];
 
   return (
     <div className="min-h-screen pt-16">
@@ -48,44 +43,57 @@ export function HomePage() {
           <div className="absolute -bottom-1/4 -left-1/4 w-72 h-72 bg-orange-400/20 rounded-full blur-3xl" />
         </div>
 
-        <div className="max-w-6xl mx-auto text-center relative z-10">
-          <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
-            <Music className="w-4 h-4" />
-            <span className="text-sm font-medium">Your Gateway to Live Music</span>
-          </div>
+        <div className="max-w-6xl mx-auto relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            {/* Left Column: Text and CTA */}
+            <div className="text-center lg:text-left">
+              <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
+                <Music className="w-4 h-4" />
+                <span className="text-sm font-medium">
+                  Your Gateway to Live Music
+                </span>
+              </div>
 
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold mb-6 leading-tight">
-            Book Tickets for the
-            <br />
-            <span className="text-orange-300">Best Concerts & Events</span>
-          </h1>
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold mb-6 leading-tight animate-in fade-in slide-in-from-bottom-8 duration-1000">
+                Book Tickets for the
+                <br />
+                <span className="text-orange-300">Best Concerts & Events</span>
+              </h1>
 
-          <p className="text-xl md:text-2xl mb-8 opacity-90 max-w-2xl mx-auto">
-            Discover amazing live performances and secure your spot in just a few clicks
-          </p>
+              <p className="text-xl md:text-2xl mb-8 opacity-90 max-w-xl mx-auto lg:mx-0 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-150 fill-mode-both">
+                Discover amazing live performances and secure your spot in just
+                a few clicks.
+              </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href={isAuthenticated ? ROUTES.CONCERTS : ROUTES.LOGIN}>
-              <Button
-                size="lg"
-                className="w-full sm:w-auto bg-white text-primary hover:bg-white/90 rounded-full px-8"
-              >
-                <Ticket className="w-5 h-5 mr-2" />
-                Browse Concerts
-              </Button>
-            </Link>
-            {!isAuthenticated && (
-              <Link href={ROUTES.REGISTER}>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="w-full sm:w-auto bg-transparent border-white text-white hover:bg-white/10 rounded-full px-8"
-                >
-                  Get Started
-                  <ChevronRight className="w-5 h-5 ml-2" />
-                </Button>
-              </Link>
-            )}
+              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300 fill-mode-both">
+                <Link href={isAuthenticated ? ROUTES.CONCERTS : ROUTES.LOGIN}>
+                  <Button
+                    size="lg"
+                    className="w-full sm:w-auto bg-white text-primary hover:bg-white/90 rounded-full px-8 shadow-lg hover:shadow-xl transition-all"
+                  >
+                    <Ticket className="w-5 h-5 mr-2" />
+                    Browse Concerts
+                  </Button>
+                </Link>
+                {!isAuthenticated && (
+                  <Link href={ROUTES.REGISTER}>
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      className="w-full sm:w-auto bg-transparent border-white text-white hover:bg-white/10 rounded-full px-8 transition-colors"
+                    >
+                      Get Started
+                      <ChevronRight className="w-5 h-5 ml-2" />
+                    </Button>
+                  </Link>
+                )}
+              </div>
+            </div>
+
+            {/* Right Column: 3D Interactive Art */}
+            <div className="hidden lg:flex justify-center items-center animate-in zoom-in duration-1000 delay-500 fill-mode-both">
+              <InteractiveLogo />
+            </div>
           </div>
         </div>
       </section>
@@ -95,15 +103,19 @@ export function HomePage() {
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
-              { icon: Calendar, value: '500+', label: 'Events' },
-              { icon: Users, value: '50K+', label: 'Happy Customers' },
-              { icon: Ticket, value: '100K+', label: 'Tickets Sold' },
-              { icon: Star, value: '4.9', label: 'Rating' },
+              { icon: Calendar, value: "500+", label: "Events" },
+              { icon: Users, value: "50K+", label: "Happy Customers" },
+              { icon: Ticket, value: "100K+", label: "Tickets Sold" },
+              { icon: Star, value: "4.9", label: "Rating" },
             ].map((stat, index) => (
               <div key={index} className="text-center">
                 <stat.icon className="w-8 h-8 mx-auto mb-2 text-primary" />
-                <div className="text-3xl font-bold text-primary">{stat.value}</div>
-                <div className="text-sm text-muted-foreground">{stat.label}</div>
+                <div className="text-3xl font-bold text-primary">
+                  {stat.value}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  {stat.label}
+                </div>
               </div>
             ))}
           </div>
@@ -126,27 +138,27 @@ export function HomePage() {
             {[
               {
                 icon: Ticket,
-                title: 'Easy Booking',
+                title: "Easy Booking",
                 description:
-                  'Book your tickets in just a few clicks. No hassle, no waiting in lines.',
-                color: 'text-blue-500',
-                bgColor: 'bg-blue-100 dark:bg-blue-900/30',
+                  "Book your tickets in just a few clicks. No hassle, no waiting in lines.",
+                color: "text-blue-500",
+                bgColor: "bg-blue-100 dark:bg-blue-900/30",
               },
               {
                 icon: Shield,
-                title: 'Secure Payments',
+                title: "Secure Payments",
                 description:
-                  'Your transactions are protected with industry-standard encryption.',
-                color: 'text-emerald-500',
-                bgColor: 'bg-emerald-100 dark:bg-emerald-900/30',
+                  "Your transactions are protected with industry-standard encryption.",
+                color: "text-emerald-500",
+                bgColor: "bg-emerald-100 dark:bg-emerald-900/30",
               },
               {
                 icon: Zap,
-                title: 'Instant Confirmation',
+                title: "Instant Confirmation",
                 description:
-                  'Get your tickets confirmed instantly. No delays, no complications.',
-                color: 'text-orange-500',
-                bgColor: 'bg-orange-100 dark:bg-orange-900/30',
+                  "Get your tickets confirmed instantly. No delays, no complications.",
+                color: "text-orange-500",
+                bgColor: "bg-orange-100 dark:bg-orange-900/30",
               },
             ].map((feature, index) => (
               <Card
@@ -159,11 +171,31 @@ export function HomePage() {
                   >
                     <feature.icon className={`w-8 h-8 ${feature.color}`} />
                   </div>
-                  <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+                  <h3 className="text-xl font-semibold mb-2">
+                    {feature.title}
+                  </h3>
                   <p className="text-muted-foreground">{feature.description}</p>
                 </CardContent>
               </Card>
             ))}
+          </div>
+
+          <div className="mt-16 bg-slate-50 dark:bg-slate-800/50 rounded-3xl p-8 lg:p-12 border border-slate-200 dark:border-slate-800 hidden sm:block relative overflow-hidden group">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+
+            <div className="text-center mb-0 relative z-10">
+              <h3 className="text-3xl font-bold font-heading mb-4">
+                Seamless Ticket Transfers
+              </h3>
+              <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+                Can&apos;t make it to the show? Send your tickets instantly to
+                friends via email or phone. Zero transfer fees, 100% secure.
+              </p>
+            </div>
+            {/* Negative margin to pull the illustration up a bit closer to the text */}
+            <div className="-mt-8 relative z-10">
+              <IsometricTransaction />
+            </div>
           </div>
         </div>
       </section>
@@ -190,18 +222,23 @@ export function HomePage() {
           </div>
 
           {isLoading ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="flex flex-col gap-4">
               {[...Array(3)].map((_, i) => (
-                <div key={i} className="rounded-xl border p-6">
-                  <Skeleton className="h-6 w-3/4 mb-4" />
-                  <Skeleton className="h-4 w-full mb-2" />
-                  <Skeleton className="h-4 w-2/3 mb-4" />
-                  <Skeleton className="h-10 w-full" />
+                <div
+                  key={i}
+                  className="rounded-xl border p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                >
+                  <div className="space-y-3 flex-1 w-full max-w-sm">
+                    <Skeleton className="h-6 w-3/4" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-2/3" />
+                  </div>
+                  <Skeleton className="h-10 w-full sm:w-32 shrink-0" />
                 </div>
               ))}
             </div>
           ) : featuredConcerts.length > 0 ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="flex flex-col gap-4">
               {featuredConcerts.map((concert) => (
                 <ConcertCard key={concert.id} concert={concert} />
               ))}
@@ -246,7 +283,8 @@ export function HomePage() {
                 Ready to Book Your Next Experience?
               </h2>
               <p className="text-lg opacity-90 mb-8 max-w-2xl mx-auto">
-                Join thousands of music lovers who trust {APP_NAME} for their concert tickets.
+                Join thousands of music lovers who trust {APP_NAME} for their
+                concert tickets.
               </p>
               <Link href={isAuthenticated ? ROUTES.CONCERTS : ROUTES.REGISTER}>
                 <Button
@@ -254,11 +292,26 @@ export function HomePage() {
                   className="bg-white text-primary hover:bg-white/90 rounded-full px-8"
                 >
                   <Ticket className="w-5 h-5 mr-2" />
-                  {isAuthenticated ? 'Browse Concerts' : 'Get Started Now'}
+                  {isAuthenticated ? "Browse Concerts" : "Get Started Now"}
                 </Button>
               </Link>
             </CardContent>
           </Card>
+        </div>
+      </section>
+
+      {/* --- Footer Isometric Scene --- */}
+      <section className="relative z-0 mt-8 mb-20">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center pt-10">
+          <div className="inline-block animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300 fill-mode-both">
+            <h2 className="text-3xl md:text-5xl font-black font-heading mb-4 text-emerald-950 dark:text-emerald-50">
+              The Stage is Yours
+            </h2>
+            <p className="text-lg text-emerald-800 dark:text-emerald-200/70 max-w-2xl mx-auto mb-8">
+              Join thousands of others in the ultimate concert experience.
+            </p>
+          </div>
+          <IsometricStage />
         </div>
       </section>
     </div>

@@ -1,8 +1,8 @@
 // frontend/src/widgets/concert-card/ui/ConcertCard.tsx
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Ticket, Calendar, Users, X } from 'lucide-react';
+import { useState } from "react";
+import { Ticket, Users, X } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -14,12 +14,12 @@ import {
   Badge,
   Progress,
   Alert,
-} from '@/shared/ui';
-import type { Concert } from '@/entities/concert';
-import { useReserve } from '@/features/reserve-concert';
-import { useIsAuthenticated } from '@/features/auth';
-import { ROUTES } from '@/shared/config';
-import { cn } from '@/shared/lib';
+} from "@/shared/ui";
+import type { Concert } from "@/entities/concert";
+import { useReserve } from "@/features/reserve-concert";
+import { useIsAuthenticated } from "@/features/auth";
+import { ROUTES } from "@/shared/config";
+import { cn } from "@/shared/lib";
 
 interface ConcertCardProps {
   concert: Concert;
@@ -30,7 +30,8 @@ export function ConcertCard({ concert }: ConcertCardProps) {
   const { reserve, isReserving, error } = useReserve();
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
-  const availablePercentage = (concert.availableSeats / concert.totalSeats) * 100;
+  const availablePercentage =
+    (concert.availableSeats / concert.totalSeats) * 100;
   const isSoldOut = concert.availableSeats === 0;
 
   const handleReserve = async () => {
@@ -47,21 +48,24 @@ export function ConcertCard({ concert }: ConcertCardProps) {
   };
 
   return (
-    <div className="relative">
-      <Card className="concert-card overflow-hidden border-slate-200 dark:border-slate-700 h-full flex flex-col">
-        <CardHeader className="pb-3">
-          <div className="flex items-start justify-between gap-2">
+    <div className="relative h-full">
+      <Card className="concert-card overflow-hidden border-slate-200 dark:border-slate-700 h-full flex flex-col transition-all duration-300 hover:shadow-xl hover:border-primary/20 hover:-translate-y-1 group">
+        <CardHeader className="pb-3 relative overflow-hidden">
+          {/* Subtle background glow effect on hover */}
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+          <div className="flex items-start justify-between gap-2 relative z-10">
             <CardTitle className="text-lg font-heading line-clamp-2">
               {concert.name}
             </CardTitle>
             <Badge
-              variant={isSoldOut ? 'destructive' : 'default'}
+              variant={isSoldOut ? "destructive" : "default"}
               className={cn(
-                'shrink-0',
-                !isSoldOut && 'bg-emerald-500 hover:bg-emerald-600'
+                "shrink-0",
+                !isSoldOut && "bg-emerald-500 hover:bg-emerald-600",
               )}
             >
-              {isSoldOut ? 'Sold Out' : 'Available'}
+              {isSoldOut ? "Sold Out" : "Available"}
             </Badge>
           </div>
           <CardDescription className="line-clamp-2">
@@ -81,10 +85,7 @@ export function ConcertCard({ concert }: ConcertCardProps) {
                 {concert.availableSeats} / {concert.totalSeats}
               </span>
             </div>
-            <Progress
-              value={availablePercentage}
-              className="h-2"
-            />
+            <Progress value={availablePercentage} className="h-2" />
           </div>
         </CardContent>
 
@@ -101,7 +102,7 @@ export function ConcertCard({ concert }: ConcertCardProps) {
               className="w-full bg-cta hover:bg-cta-hover text-white"
             >
               <Ticket className="w-4 h-4 mr-2" />
-              {isReserving ? 'Reserving...' : 'Reserve Ticket'}
+              {isReserving ? "Reserving..." : "Reserve Ticket"}
             </Button>
           )}
         </CardFooter>
