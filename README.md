@@ -7,7 +7,7 @@
 ## 📁 Project Structure
 
 ```
-ticket-shop/
+concert-ticket-reservation-system/
 ├── backend/               → NestJS 11 REST API
 │   └── src/
 │       ├── common/        → Guards, Filters, Interceptors, Decorators
@@ -44,19 +44,20 @@ ticket-shop/
 
 ### N-Tier / Clean Architecture
 
-| Layer | Responsibility | Files |
-|---|---|---|
-| **Controller** | HTTP routing, auth guards, DTO parsing | `*.controller.ts` |
-| **Service** | Business logic, rules, transactions | `*.service.ts` |
-| **Repository** | Data access, TypeORM queries | `*.repository.ts` |
-| **Entity** | Database schema definition | `entities/*.entity.ts` |
-| **DTO** | Input validation contracts | `dto/*.dto.ts` |
+| Layer          | Responsibility                         | Files                  |
+| -------------- | -------------------------------------- | ---------------------- |
+| **Controller** | HTTP routing, auth guards, DTO parsing | `*.controller.ts`      |
+| **Service**    | Business logic, rules, transactions    | `*.service.ts`         |
+| **Repository** | Data access, TypeORM queries           | `*.repository.ts`      |
+| **Entity**     | Database schema definition             | `entities/*.entity.ts` |
+| **DTO**        | Input validation contracts             | `dto/*.dto.ts`         |
 
 ---
 
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - Node.js 24+
 - Docker (for PostgreSQL)
 
@@ -64,7 +65,7 @@ ticket-shop/
 
 ```bash
 git clone <repo-url>
-cd ticket-shop
+cd concert-ticket-reservation-system
 ```
 
 ### 2. Start Database
@@ -82,6 +83,7 @@ npm run start:dev         # → http://localhost:4000/api/v1
 ```
 
 **Environment variables** (`.env`):
+
 ```env
 NODE_ENV=development
 PORT=4000
@@ -124,13 +126,13 @@ npm run db:reset           # Revert + re-run migrations
 <details>
 <summary>👤 Test Accounts (after seeding)</summary>
 
-| Email | Role | Password |
-|-------|------|----------|
-| `admin@ticketshop.com` | admin | `password123` |
-| `john.doe@email.com` | user | `password123` |
-| `jane.smith@email.com` | user | `password123` |
-| `mike.wilson@email.com` | user | `password123` |
-| ... | user | `password123` |
+| Email                   | Role  | Password      |
+| ----------------------- | ----- | ------------- |
+| `admin@ticketshop.com`  | admin | `password123` |
+| `john.doe@email.com`    | user  | `password123` |
+| `jane.smith@email.com`  | user  | `password123` |
+| `mike.wilson@email.com` | user  | `password123` |
+| ...                     | user  | `password123` |
 
 </details>
 
@@ -143,6 +145,7 @@ npm run dev               # → http://localhost:3000
 ```
 
 **Environment variables** (`.env.local`):
+
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:4000/api/v1
 ```
@@ -188,21 +191,21 @@ npm run db:seed:sql
 
 After running `npm run db:seed`, you'll have:
 
-| Type | Count | Description |
-|------|-------|-------------|
-| **Users** | 8 | 1 admin + 7 regular users |
-| **Concerts** | 15 | International & Thai artists |
-| **Reservations** | 15 | 13 active + 2 cancelled |
+| Type             | Count | Description                  |
+| ---------------- | ----- | ---------------------------- |
+| **Users**        | 8     | 1 admin + 7 regular users    |
+| **Concerts**     | 15    | International & Thai artists |
+| **Reservations** | 15    | 13 active + 2 cancelled      |
 
 **Test Accounts** (all use password: `password123`):
 
-| Email | Role |
-|-------|------|
-| `admin@ticketshop.com` | admin |
-| `john.doe@email.com` | user |
-| `jane.smith@email.com` | user |
-| `mike.wilson@email.com` | user |
-| `sarah.johnson@email.com` | user |
+| Email                     | Role  |
+| ------------------------- | ----- |
+| `admin@ticketshop.com`    | admin |
+| `john.doe@email.com`      | user  |
+| `jane.smith@email.com`    | user  |
+| `mike.wilson@email.com`   | user  |
+| `sarah.johnson@email.com` | user  |
 
 ### Database Schema
 
@@ -239,12 +242,12 @@ npm run test:cov
 
 **Test files (31 tests total):**
 
-| File | Tests | Coverage (Lines) |
-|---|---|---|
-| `concerts.service.spec.ts` | 10 | 100% |
-| `reservations.service.spec.ts` | 10 | 92% |
-| `auth.service.spec.ts` | 5 | 100% |
-| `users.service.spec.ts` | 6 | 100% |
+| File                           | Tests | Coverage (Lines) |
+| ------------------------------ | ----- | ---------------- |
+| `concerts.service.spec.ts`     | 10    | 100%             |
+| `reservations.service.spec.ts` | 10    | 92%              |
+| `auth.service.spec.ts`         | 5     | 100%             |
+| `users.service.spec.ts`        | 6     | 100%             |
 
 ---
 
@@ -252,38 +255,38 @@ npm run test:cov
 
 ### Backend (NestJS)
 
-| Package | Role |
-|---|---|
-| `@nestjs/core` | NestJS framework core |
-| `@nestjs/typeorm` | TypeORM integration for database |
-| `@nestjs/config` | Environment config via `.env` |
-| `@nestjs/jwt` | JWT token generation & verification |
-| `@nestjs/passport` | Auth strategy integration |
-| `passport-jwt` | JWT extraction from Authorization header |
-| `bcryptjs` | Password hashing (12 salt rounds) |
-| `class-validator` | DTO field validation decorators |
-| `class-transformer` | DTO transformation + `@Exclude()` |
-| `@nestjs/mapped-types` | `PartialType` for UpdateDto |
-| `typeorm` | ORM with migrations and query builder |
-| `pg` | PostgreSQL driver |
+| Package                | Role                                     |
+| ---------------------- | ---------------------------------------- |
+| `@nestjs/core`         | NestJS framework core                    |
+| `@nestjs/typeorm`      | TypeORM integration for database         |
+| `@nestjs/config`       | Environment config via `.env`            |
+| `@nestjs/jwt`          | JWT token generation & verification      |
+| `@nestjs/passport`     | Auth strategy integration                |
+| `passport-jwt`         | JWT extraction from Authorization header |
+| `bcryptjs`             | Password hashing (12 salt rounds)        |
+| `class-validator`      | DTO field validation decorators          |
+| `class-transformer`    | DTO transformation + `@Exclude()`        |
+| `@nestjs/mapped-types` | `PartialType` for UpdateDto              |
+| `typeorm`              | ORM with migrations and query builder    |
+| `pg`                   | PostgreSQL driver                        |
 
 ### Frontend (Next.js)
 
-| Package | Role |
-|---|---|
-| `next` | React framework with App Router |
-| `tailwindcss` | Utility-first CSS framework (v4) |
-| `react` / `react-dom` | UI rendering |
-| Custom CSS | Design tokens, hero gradient, responsive nav |
+| Package               | Role                                         |
+| --------------------- | -------------------------------------------- |
+| `next`                | React framework with App Router              |
+| `tailwindcss`         | Utility-first CSS framework (v4)             |
+| `react` / `react-dom` | UI rendering                                 |
+| Custom CSS            | Design tokens, hero gradient, responsive nav |
 
 ### Dev / Testing
 
-| Package | Role |
-|---|---|
-| `@nestjs/testing` | NestJS test module builder |
-| `jest` | Test runner |
-| `ts-jest` | TypeScript Jest transformer |
-| `@types/*` | TypeScript type definitions |
+| Package           | Role                        |
+| ----------------- | --------------------------- |
+| `@nestjs/testing` | NestJS test module builder  |
+| `jest`            | Test runner                 |
+| `ts-jest`         | TypeScript Jest transformer |
+| `@types/*`        | TypeScript type definitions |
 
 ---
 
@@ -309,15 +312,15 @@ GET    /api/v1/reservations           All reservations (Admin)
 
 ## 🌐 Pages
 
-| Route | Role | Description |
-|---|---|---|
-| `/` | Public | Landing page |
-| `/auth/login` | Public | Login form |
-| `/auth/register` | Public | Registration form |
-| `/concerts` | User | Browse all concerts + reserve |
-| `/reservations/me` | User | Own reservation history + cancel |
-| `/admin/concerts` | Admin | Create / edit / delete concerts |
-| `/admin/reservations` | Admin | All users reservation history |
+| Route                 | Role   | Description                      |
+| --------------------- | ------ | -------------------------------- |
+| `/`                   | Public | Landing page                     |
+| `/auth/login`         | Public | Login form                       |
+| `/auth/register`      | Public | Registration form                |
+| `/concerts`           | User   | Browse all concerts + reserve    |
+| `/reservations/me`    | User   | Own reservation history + cancel |
+| `/admin/concerts`     | Admin  | Create / edit / delete concerts  |
+| `/admin/reservations` | Admin  | All users reservation history    |
 
 ---
 
@@ -331,6 +334,7 @@ Password: password123
 ```
 
 To create a new admin manually:
+
 ```sql
 UPDATE users SET role = 'admin' WHERE email = 'your-email@example.com';
 ```
