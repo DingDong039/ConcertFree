@@ -1,7 +1,7 @@
 // frontend/src/views/admin-reservations/ui/AdminReservationsPage.tsx
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
+import { useState } from "react";
 import {
   Ticket,
   RefreshCw,
@@ -9,7 +9,7 @@ import {
   Calendar,
   CheckCircle,
   XCircle,
-} from 'lucide-react';
+} from "lucide-react";
 import {
   Skeleton,
   Badge,
@@ -24,51 +24,40 @@ import {
   TableRow,
   Avatar,
   AvatarFallback,
-} from '@/shared/ui';
-import { reservationApi, type Reservation, ReservationStatusBadge } from '@/entities/reservation';
-import { cn } from '@/shared/lib';
+} from "@/shared/ui";
+import {
+  type Reservation,
+  ReservationStatusBadge,
+} from "@/entities/reservation";
+import useSWR from "swr";
+import { fetcher } from "@/shared/api";
 
 export function AdminReservationsPage() {
-  const [reservations, setReservations] = useState<Reservation[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const {
+    data: reservations = [],
+    isLoading,
+    error: swrError,
+    mutate: fetchReservations,
+  } = useSWR<Reservation[]>("/admin/reservations", fetcher);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchReservations = async () => {
-      try {
-        setIsLoading(true);
-        const data = await reservationApi.getAll();
-        setReservations(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load reservations');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchReservations();
-  }, []);
+  const currentError = swrError
+    ? swrError instanceof Error
+      ? swrError.message
+      : "Failed to load reservations"
+    : error;
 
   const handleRetry = () => {
     setError(null);
-    setIsLoading(true);
-    reservationApi
-      .getAll()
-      .then((data) => {
-        setReservations(data);
-      })
-      .catch((err) => {
-        setError(err instanceof Error ? err.message : 'Failed to load reservations');
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
+    fetchReservations();
   };
 
-  const activeCount = reservations.filter((r) => r.status === 'active').length;
-  const cancelledCount = reservations.filter((r) => r.status === 'cancelled').length;
+  const activeCount = reservations.filter((r) => r.status === "active").length;
+  const cancelledCount = reservations.filter(
+    (r) => r.status === "cancelled",
+  ).length;
 
-  if (error) {
+  if (currentError && !isLoading) {
     return (
       <div className="pt-24 pb-12 px-4">
         <div className="max-w-7xl mx-auto">
@@ -77,8 +66,10 @@ export function AdminReservationsPage() {
               <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Ticket className="w-8 h-8 text-destructive" />
               </div>
-              <h2 className="text-xl font-semibold mb-2">Failed to Load Reservations</h2>
-              <p className="text-muted-foreground mb-6">{error}</p>
+              <h2 className="text-xl font-semibold mb-2">
+                Failed to Load Reservations
+              </h2>
+              <p className="text-muted-foreground mb-6">{currentError}</p>
               <Button onClick={handleRetry} variant="outline" className="gap-2">
                 <RefreshCw className="w-4 h-4" />
                 Try Again
@@ -111,7 +102,10 @@ export function AdminReservationsPage() {
 
           {!isLoading && reservations.length > 0 && (
             <div className="hidden sm:flex items-center gap-2">
-              <Badge variant="default" className="bg-emerald-500 hover:bg-emerald-600 gap-1">
+              <Badge
+                variant="default"
+                className="bg-emerald-500 hover:bg-emerald-600 gap-1"
+              >
                 <CheckCircle className="w-3 h-3" />
                 {activeCount} Active
               </Badge>
@@ -126,7 +120,10 @@ export function AdminReservationsPage() {
         {isLoading ? (
           <div className="space-y-4">
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="rounded-xl border border-slate-200 dark:border-slate-700 p-4">
+              <div
+                key={i}
+                className="rounded-xl border border-slate-200 dark:border-slate-700 p-4"
+              >
                 <div className="flex justify-between">
                   <Skeleton className="h-6 w-1/4" />
                   <Skeleton className="h-6 w-20" />
@@ -141,7 +138,9 @@ export function AdminReservationsPage() {
               <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
                 <Ticket className="w-8 h-8 text-muted-foreground" />
               </div>
-              <h2 className="text-xl font-semibold mb-2">No Reservations Yet</h2>
+              <h2 className="text-xl font-semibold mb-2">
+                No Reservations Yet
+              </h2>
               <p className="text-muted-foreground">
                 Reservations will appear here once users start booking tickets
               </p>
@@ -167,22 +166,24 @@ export function AdminReservationsPage() {
                         <div className="flex items-center gap-3">
                           <Avatar className="w-8 h-8">
                             <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-                              {reservation.user?.name?.charAt(0).toUpperCase() || 'U'}
+                              {reservation.user?.name
+                                ?.charAt(0)
+                                .toUpperCase() || "U"}
                             </AvatarFallback>
                           </Avatar>
                           <div>
                             <p className="font-medium">
-                              {reservation.user?.name || 'N/A'}
+                              {reservation.user?.name || "N/A"}
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              {reservation.user?.email || 'N/A'}
+                              {reservation.user?.email || "N/A"}
                             </p>
                           </div>
                         </div>
                       </TableCell>
                       <TableCell>
                         <p className="font-medium">
-                          {reservation.concert?.name || 'N/A'}
+                          {reservation.concert?.name || "N/A"}
                         </p>
                       </TableCell>
                       <TableCell>
@@ -192,11 +193,14 @@ export function AdminReservationsPage() {
                         <div className="flex items-center gap-1.5 text-muted-foreground">
                           <Calendar className="w-4 h-4" />
                           <span className="text-sm">
-                            {new Date(reservation.createdAt).toLocaleDateString('en-US', {
-                              year: 'numeric',
-                              month: 'short',
-                              day: 'numeric',
-                            })}
+                            {new Date(reservation.createdAt).toLocaleDateString(
+                              "en-US",
+                              {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
+                              },
+                            )}
                           </span>
                         </div>
                       </TableCell>
@@ -215,15 +219,16 @@ export function AdminReservationsPage() {
                       <div className="flex items-center gap-3">
                         <Avatar className="w-10 h-10">
                           <AvatarFallback className="bg-primary text-primary-foreground">
-                            {reservation.user?.name?.charAt(0).toUpperCase() || 'U'}
+                            {reservation.user?.name?.charAt(0).toUpperCase() ||
+                              "U"}
                           </AvatarFallback>
                         </Avatar>
                         <div>
                           <p className="font-medium">
-                            {reservation.user?.name || 'N/A'}
+                            {reservation.user?.name || "N/A"}
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            {reservation.user?.email || 'N/A'}
+                            {reservation.user?.email || "N/A"}
                           </p>
                         </div>
                       </div>
@@ -235,18 +240,21 @@ export function AdminReservationsPage() {
                         <Ticket className="w-4 h-4 text-muted-foreground" />
                         <span className="text-muted-foreground">Concert:</span>
                         <span className="font-medium">
-                          {reservation.concert?.name || 'N/A'}
+                          {reservation.concert?.name || "N/A"}
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Calendar className="w-4 h-4 text-muted-foreground" />
                         <span className="text-muted-foreground">Reserved:</span>
                         <span>
-                          {new Date(reservation.createdAt).toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric',
-                          })}
+                          {new Date(reservation.createdAt).toLocaleDateString(
+                            "en-US",
+                            {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                            },
+                          )}
                         </span>
                       </div>
                     </div>
@@ -257,7 +265,10 @@ export function AdminReservationsPage() {
 
             {/* Mobile Stats */}
             <div className="md:hidden flex items-center justify-center gap-2 mt-6">
-              <Badge variant="default" className="bg-emerald-500 hover:bg-emerald-600 gap-1">
+              <Badge
+                variant="default"
+                className="bg-emerald-500 hover:bg-emerald-600 gap-1"
+              >
                 <CheckCircle className="w-3 h-3" />
                 {activeCount} Active
               </Badge>

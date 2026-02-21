@@ -1,74 +1,51 @@
 // frontend/src/views/concerts/ui/ConcertsPage.tsx
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { Music, RefreshCw, Search, Calendar } from 'lucide-react';
-import { Skeleton, Card, CardContent, Button, Input, Badge } from '@/shared/ui';
-import { ConcertCard } from '@/widgets/concert-card';
-import { concertApi, type Concert } from '@/entities/concert';
+import { useState } from "react";
+import { Music, RefreshCw, Search, Calendar } from "lucide-react";
+import { Skeleton, Card, CardContent, Button, Input, Badge } from "@/shared/ui";
+import { ConcertCard } from "@/widgets/concert-card";
+import { type Concert } from "@/entities/concert";
+import useSWR from "swr";
+import { fetcher } from "@/shared/api";
 
 export function ConcertsPage() {
-  const [concerts, setConcerts] = useState<Concert[]>([]);
-  const [filteredConcerts, setFilteredConcerts] = useState<Concert[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const {
+    data: concerts = [],
+    isLoading,
+    error: swrError,
+    mutate: fetchConcerts,
+  } = useSWR<Concert[]>("/concerts", fetcher);
   const [error, setError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
 
-  useEffect(() => {
-    const fetchConcerts = async () => {
-      try {
-        setIsLoading(true);
-        const data = await concertApi.getAll();
-        setConcerts(data);
-        setFilteredConcerts(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load concerts');
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const currentError = swrError
+    ? swrError instanceof Error
+      ? swrError.message
+      : "Failed to load concerts"
+    : error;
 
-    fetchConcerts();
-  }, []);
-
-  // Filter concerts based on search query
-  useEffect(() => {
-    if (!searchQuery.trim()) {
-      setFilteredConcerts(concerts);
-      return;
-    }
-
-    const query = searchQuery.toLowerCase();
-    const filtered = concerts.filter(
-      (concert) =>
-        concert.name.toLowerCase().includes(query) ||
-        concert.description.toLowerCase().includes(query)
-    );
-    setFilteredConcerts(filtered);
-  }, [searchQuery, concerts]);
+  // Derive filtered concerts during render (Next.js performance best practice)
+  const filteredConcerts = searchQuery.trim()
+    ? concerts.filter((concert) => {
+        const query = searchQuery.toLowerCase();
+        return (
+          concert.name.toLowerCase().includes(query) ||
+          concert.description.toLowerCase().includes(query)
+        );
+      })
+    : concerts;
 
   const handleRetry = () => {
     setError(null);
-    setIsLoading(true);
-    concertApi
-      .getAll()
-      .then((data) => {
-        setConcerts(data);
-        setFilteredConcerts(data);
-      })
-      .catch((err) => {
-        setError(err instanceof Error ? err.message : 'Failed to load concerts');
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
+    fetchConcerts();
   };
 
   // Calculate stats
   const availableCount = concerts.filter((c) => c.availableSeats > 0).length;
   const soldOutCount = concerts.filter((c) => c.availableSeats === 0).length;
 
-  if (error) {
+  if (currentError && !isLoading) {
     return (
       <div className="pt-24 pb-12 px-4">
         <div className="max-w-7xl mx-auto">
@@ -77,8 +54,10 @@ export function ConcertsPage() {
               <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Music className="w-8 h-8 text-destructive" />
               </div>
-              <h2 className="text-xl font-semibold mb-2">Failed to Load Concerts</h2>
-              <p className="text-muted-foreground mb-6">{error}</p>
+              <h2 className="text-xl font-semibold mb-2">
+                Failed to Load Concerts
+              </h2>
+              <p className="text-muted-foreground mb-6">{currentError}</p>
               <Button onClick={handleRetry} variant="outline" className="gap-2">
                 <RefreshCw className="w-4 h-4" />
                 Try Again
@@ -125,12 +104,13 @@ export function ConcertsPage() {
 
           {/* Stats */}
           <div className="flex items-center gap-2">
-            <Badge variant="default" className="bg-emerald-500 hover:bg-emerald-600">
+            <Badge
+              variant="default"
+              className="bg-emerald-500 hover:bg-emerald-600"
+            >
               {availableCount} Available
             </Badge>
-            <Badge variant="secondary">
-              {soldOutCount} Sold Out
-            </Badge>
+            <Badge variant="secondary">{soldOutCount} Sold Out</Badge>
           </div>
         </div>
 
@@ -138,7 +118,10 @@ export function ConcertsPage() {
         {isLoading ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="rounded-xl border border-slate-200 dark:border-slate-700 p-6">
+              <div
+                key={i}
+                className="rounded-xl border border-slate-200 dark:border-slate-700 p-6"
+              >
                 <Skeleton className="h-6 w-3/4 mb-4" />
                 <Skeleton className="h-4 w-full mb-2" />
                 <Skeleton className="h-4 w-2/3 mb-6" />
@@ -155,17 +138,21 @@ export function ConcertsPage() {
               </div>
               {searchQuery ? (
                 <>
-                  <h2 className="text-xl font-semibold mb-2">No Results Found</h2>
+                  <h2 className="text-xl font-semibold mb-2">
+                    No Results Found
+                  </h2>
                   <p className="text-muted-foreground mb-4">
                     No concerts match your search &quot;{searchQuery}&quot;
                   </p>
-                  <Button variant="outline" onClick={() => setSearchQuery('')}>
+                  <Button variant="outline" onClick={() => setSearchQuery("")}>
                     Clear Search
                   </Button>
                 </>
               ) : (
                 <>
-                  <h2 className="text-xl font-semibold mb-2">No Concerts Available</h2>
+                  <h2 className="text-xl font-semibold mb-2">
+                    No Concerts Available
+                  </h2>
                   <p className="text-muted-foreground">
                     Check back later for upcoming events!
                   </p>

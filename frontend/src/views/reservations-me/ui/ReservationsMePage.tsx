@@ -1,9 +1,9 @@
 // frontend/src/views/reservations-me/ui/ReservationsMePage.tsx
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { Ticket, RefreshCw, Music, CheckCircle, XCircle } from 'lucide-react';
+import { useState } from "react";
+import Link from "next/link";
+import { Ticket, RefreshCw, Music, CheckCircle, XCircle } from "lucide-react";
 import {
   Skeleton,
   Card,
@@ -11,41 +11,41 @@ import {
   Button,
   Badge,
   Separator,
-} from '@/shared/ui';
-import { ReservationCard, reservationApi, type Reservation } from '@/entities/reservation';
-import { ROUTES } from '@/shared/config';
+} from "@/shared/ui";
+import {
+  ReservationCard,
+  reservationApi,
+  type Reservation,
+} from "@/entities/reservation";
+import { ROUTES } from "@/shared/config";
+import useSWR from "swr";
+import { fetcher } from "@/shared/api";
 
 export function ReservationsMePage() {
-  const [reservations, setReservations] = useState<Reservation[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const {
+    data: reservations = [],
+    isLoading,
+    error: swrError,
+    mutate,
+  } = useSWR<Reservation[]>("/reservations/me", fetcher);
   const [error, setError] = useState<string | null>(null);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchReservations = async () => {
-      try {
-        setIsLoading(true);
-        const data = await reservationApi.getMine();
-        setReservations(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load reservations');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchReservations();
-  }, []);
+  const currentError = swrError
+    ? swrError instanceof Error
+      ? swrError.message
+      : "Failed to load reservations"
+    : error;
 
   const handleCancel = async (id: string) => {
     try {
       setCancellingId(id);
       await reservationApi.cancel(id);
-      setReservations((prev) =>
-        prev.map((r) => (r.id === id ? { ...r, status: 'cancelled' as const } : r))
-      );
+      mutate();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to cancel reservation');
+      setError(
+        err instanceof Error ? err.message : "Failed to cancel reservation",
+      );
     } finally {
       setCancellingId(null);
     }
@@ -53,24 +53,15 @@ export function ReservationsMePage() {
 
   const handleRetry = () => {
     setError(null);
-    setIsLoading(true);
-    reservationApi
-      .getMine()
-      .then((data) => {
-        setReservations(data);
-      })
-      .catch((err) => {
-        setError(err instanceof Error ? err.message : 'Failed to load reservations');
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
+    mutate();
   };
 
-  const activeReservations = reservations.filter((r) => r.status === 'active');
-  const cancelledReservations = reservations.filter((r) => r.status === 'cancelled');
+  const activeReservations = reservations.filter((r) => r.status === "active");
+  const cancelledReservations = reservations.filter(
+    (r) => r.status === "cancelled",
+  );
 
-  if (error) {
+  if (currentError && !isLoading) {
     return (
       <div className="pt-24 pb-12 px-4">
         <div className="max-w-7xl mx-auto">
@@ -79,8 +70,10 @@ export function ReservationsMePage() {
               <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Ticket className="w-8 h-8 text-destructive" />
               </div>
-              <h2 className="text-xl font-semibold mb-2">Failed to Load Reservations</h2>
-              <p className="text-muted-foreground mb-6">{error}</p>
+              <h2 className="text-xl font-semibold mb-2">
+                Failed to Load Reservations
+              </h2>
+              <p className="text-muted-foreground mb-6">{currentError}</p>
               <Button onClick={handleRetry} variant="outline" className="gap-2">
                 <RefreshCw className="w-4 h-4" />
                 Try Again
@@ -113,7 +106,10 @@ export function ReservationsMePage() {
 
           {!isLoading && reservations.length > 0 && (
             <div className="hidden sm:flex items-center gap-2">
-              <Badge variant="default" className="bg-emerald-500 hover:bg-emerald-600 gap-1">
+              <Badge
+                variant="default"
+                className="bg-emerald-500 hover:bg-emerald-600 gap-1"
+              >
                 <CheckCircle className="w-3 h-3" />
                 {activeReservations.length} Active
               </Badge>
@@ -128,7 +124,10 @@ export function ReservationsMePage() {
         {isLoading ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="rounded-xl border border-slate-200 dark:border-slate-700 p-6">
+              <div
+                key={i}
+                className="rounded-xl border border-slate-200 dark:border-slate-700 p-6"
+              >
                 <Skeleton className="h-6 w-3/4 mb-4" />
                 <Skeleton className="h-4 w-full mb-2" />
                 <Skeleton className="h-4 w-2/3 mb-6" />
@@ -142,7 +141,9 @@ export function ReservationsMePage() {
               <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
                 <Music className="w-8 h-8 text-muted-foreground" />
               </div>
-              <h2 className="text-xl font-semibold mb-2">No Reservations Yet</h2>
+              <h2 className="text-xl font-semibold mb-2">
+                No Reservations Yet
+              </h2>
               <p className="text-muted-foreground mb-6">
                 Start by booking tickets for your favorite concerts
               </p>
@@ -161,7 +162,10 @@ export function ReservationsMePage() {
                 <div className="flex items-center gap-2 mb-4">
                   <CheckCircle className="w-5 h-5 text-emerald-500" />
                   <h2 className="text-xl font-semibold">Active Tickets</h2>
-                  <Badge variant="default" className="bg-emerald-500 hover:bg-emerald-600">
+                  <Badge
+                    variant="default"
+                    className="bg-emerald-500 hover:bg-emerald-600"
+                  >
                     {activeReservations.length}
                   </Badge>
                 </div>
@@ -179,9 +183,10 @@ export function ReservationsMePage() {
             )}
 
             {/* Separator */}
-            {activeReservations.length > 0 && cancelledReservations.length > 0 && (
-              <Separator className="my-8" />
-            )}
+            {activeReservations.length > 0 &&
+              cancelledReservations.length > 0 && (
+                <Separator className="my-8" />
+              )}
 
             {/* Cancelled Reservations */}
             {cancelledReservations.length > 0 && (
@@ -191,7 +196,9 @@ export function ReservationsMePage() {
                   <h2 className="text-xl font-semibold text-muted-foreground">
                     Cancelled Tickets
                   </h2>
-                  <Badge variant="secondary">{cancelledReservations.length}</Badge>
+                  <Badge variant="secondary">
+                    {cancelledReservations.length}
+                  </Badge>
                 </div>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {cancelledReservations.map((reservation) => (

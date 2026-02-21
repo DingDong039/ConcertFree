@@ -1,7 +1,7 @@
 // frontend/src/views/admin-concerts/ui/AdminConcertsPage.tsx
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
+import { useState } from "react";
 import {
   Plus,
   RefreshCw,
@@ -11,7 +11,7 @@ import {
   Calendar,
   Users,
   MoreHorizontal,
-} from 'lucide-react';
+} from "lucide-react";
 import {
   Button,
   Card,
@@ -46,40 +46,41 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
   Progress,
-} from '@/shared/ui';
-import { ConcertForm } from '@/widgets/concert-form';
-import { concertApi, type Concert, type CreateConcertPayload } from '@/entities/concert';
-import { cn } from '@/shared/lib';
+} from "@/shared/ui";
+import { ConcertForm } from "@/widgets/concert-form";
+import {
+  concertApi,
+  type Concert,
+  type CreateConcertPayload,
+} from "@/entities/concert";
+import { cn } from "@/shared/lib";
+import useSWR from "swr";
+import { fetcher } from "@/shared/api";
 
 export function AdminConcertsPage() {
-  const [concerts, setConcerts] = useState<Concert[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const {
+    data: concerts = [],
+    isLoading,
+    error: swrError,
+    mutate,
+  } = useSWR<Concert[]>("/concerts", fetcher);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [editingConcert, setEditingConcert] = useState<Concert | null>(null);
   const [submittingId, setSubmittingId] = useState<string | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
-  const fetchConcerts = async () => {
-    try {
-      setIsLoading(true);
-      const data = await concertApi.getAll();
-      setConcerts(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load concerts');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchConcerts();
-  }, []);
+  // Use swrError if it exists, otherwise use local error
+  const currentError = swrError
+    ? swrError instanceof Error
+      ? swrError.message
+      : "Failed to load concerts"
+    : error;
 
   const handleCreate = async (data: CreateConcertPayload) => {
     try {
-      const concert = await concertApi.create(data);
-      setConcerts((prev) => [...prev, concert]);
+      await concertApi.create(data);
+      mutate();
       setShowForm(false);
     } catch (err) {
       throw err;
@@ -89,10 +90,8 @@ export function AdminConcertsPage() {
   const handleUpdate = async (data: CreateConcertPayload) => {
     if (!editingConcert) return;
     try {
-      const concert = await concertApi.update(editingConcert.id, data);
-      setConcerts((prev) =>
-        prev.map((c) => (c.id === concert.id ? concert : c))
-      );
+      await concertApi.update(editingConcert.id, data);
+      mutate();
       setEditingConcert(null);
       setShowForm(false);
     } catch (err) {
@@ -104,10 +103,10 @@ export function AdminConcertsPage() {
     try {
       setSubmittingId(id);
       await concertApi.delete(id);
-      setConcerts((prev) => prev.filter((c) => c.id !== id));
+      mutate();
       setDeleteConfirmId(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete concert');
+      setError(err instanceof Error ? err.message : "Failed to delete concert");
     } finally {
       setSubmittingId(null);
     }
@@ -125,10 +124,10 @@ export function AdminConcertsPage() {
 
   const handleRetry = () => {
     setError(null);
-    fetchConcerts();
+    mutate();
   };
 
-  if (error && !isLoading) {
+  if (currentError && !isLoading) {
     return (
       <div className="pt-24 pb-12 px-4">
         <div className="max-w-7xl mx-auto">
@@ -137,8 +136,10 @@ export function AdminConcertsPage() {
               <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Music className="w-8 h-8 text-destructive" />
               </div>
-              <h2 className="text-xl font-semibold mb-2">Failed to Load Concerts</h2>
-              <p className="text-muted-foreground mb-6">{error}</p>
+              <h2 className="text-xl font-semibold mb-2">
+                Failed to Load Concerts
+              </h2>
+              <p className="text-muted-foreground mb-6">{currentError}</p>
               <Button onClick={handleRetry} variant="outline" className="gap-2">
                 <RefreshCw className="w-4 h-4" />
                 Try Again
@@ -185,12 +186,12 @@ export function AdminConcertsPage() {
           <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
             <SheetHeader>
               <SheetTitle className="font-heading">
-                {editingConcert ? 'Edit Concert' : 'Create New Concert'}
+                {editingConcert ? "Edit Concert" : "Create New Concert"}
               </SheetTitle>
               <SheetDescription>
                 {editingConcert
-                  ? 'Update the concert details below'
-                  : 'Fill in the concert details below'}
+                  ? "Update the concert details below"
+                  : "Fill in the concert details below"}
               </SheetDescription>
             </SheetHeader>
             <div className="mt-6">
@@ -213,7 +214,10 @@ export function AdminConcertsPage() {
         {isLoading ? (
           <div className="space-y-4">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="rounded-xl border border-slate-200 dark:border-slate-700 p-4">
+              <div
+                key={i}
+                className="rounded-xl border border-slate-200 dark:border-slate-700 p-4"
+              >
                 <Skeleton className="h-6 w-1/3 mb-4" />
                 <Skeleton className="h-4 w-full mb-2" />
                 <Skeleton className="h-4 w-2/3" />
@@ -270,21 +274,29 @@ export function AdminConcertsPage() {
                         </TableCell>
                         <TableCell>
                           <Badge
-                            variant={isSoldOut ? 'destructive' : 'default'}
+                            variant={isSoldOut ? "destructive" : "default"}
                             className={cn(
-                              !isSoldOut && 'bg-emerald-500 hover:bg-emerald-600'
+                              !isSoldOut &&
+                                "bg-emerald-500 hover:bg-emerald-600",
                             )}
                           >
-                            {isSoldOut ? 'Sold Out' : 'Available'}
+                            {isSoldOut ? "Sold Out" : "Available"}
                           </Badge>
                         </TableCell>
                         <TableCell>
                           <div className="w-32">
                             <div className="flex items-center justify-between text-xs mb-1">
-                              <span className="text-muted-foreground">Seats</span>
-                              <span>{concert.availableSeats}/{concert.totalSeats}</span>
+                              <span className="text-muted-foreground">
+                                Seats
+                              </span>
+                              <span>
+                                {concert.availableSeats}/{concert.totalSeats}
+                              </span>
                             </div>
-                            <Progress value={availabilityPercent} className="h-1.5" />
+                            <Progress
+                              value={availabilityPercent}
+                              className="h-1.5"
+                            />
                           </div>
                         </TableCell>
                         <TableCell className="text-right">
@@ -313,10 +325,13 @@ export function AdminConcertsPage() {
                               </AlertDialogTrigger>
                               <AlertDialogContent>
                                 <AlertDialogHeader>
-                                  <AlertDialogTitle>Delete Concert</AlertDialogTitle>
+                                  <AlertDialogTitle>
+                                    Delete Concert
+                                  </AlertDialogTitle>
                                   <AlertDialogDescription>
-                                    Are you sure you want to delete &quot;{concert.name}&quot;?
-                                    This action cannot be undone.
+                                    Are you sure you want to delete &quot;
+                                    {concert.name}&quot;? This action cannot be
+                                    undone.
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
@@ -326,8 +341,8 @@ export function AdminConcertsPage() {
                                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                   >
                                     {submittingId === concert.id
-                                      ? 'Deleting...'
-                                      : 'Delete'}
+                                      ? "Deleting..."
+                                      : "Delete"}
                                   </AlertDialogAction>
                                 </AlertDialogFooter>
                               </AlertDialogContent>
@@ -353,7 +368,9 @@ export function AdminConcertsPage() {
                     <CardHeader className="pb-3">
                       <div className="flex items-start justify-between">
                         <div>
-                          <CardTitle className="text-lg">{concert.name}</CardTitle>
+                          <CardTitle className="text-lg">
+                            {concert.name}
+                          </CardTitle>
                           <CardDescription className="line-clamp-2">
                             {concert.description}
                           </CardDescription>
@@ -365,7 +382,9 @@ export function AdminConcertsPage() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleEdit(concert)}>
+                            <DropdownMenuItem
+                              onClick={() => handleEdit(concert)}
+                            >
                               <Edit className="w-4 h-4 mr-2" />
                               Edit
                             </DropdownMenuItem>
@@ -383,12 +402,12 @@ export function AdminConcertsPage() {
                     <CardContent>
                       <div className="flex items-center justify-between mb-3">
                         <Badge
-                          variant={isSoldOut ? 'destructive' : 'default'}
+                          variant={isSoldOut ? "destructive" : "default"}
                           className={cn(
-                            !isSoldOut && 'bg-emerald-500 hover:bg-emerald-600'
+                            !isSoldOut && "bg-emerald-500 hover:bg-emerald-600",
                           )}
                         >
-                          {isSoldOut ? 'Sold Out' : 'Available'}
+                          {isSoldOut ? "Sold Out" : "Available"}
                         </Badge>
                         <div className="flex items-center gap-1 text-sm text-muted-foreground">
                           <Users className="w-4 h-4" />
@@ -405,13 +424,16 @@ export function AdminConcertsPage() {
             {/* Mobile Delete Confirmation */}
             <AlertDialog
               open={!!deleteConfirmId}
-              onOpenChange={(open) => setDeleteConfirmId(open ? deleteConfirmId : null)}
+              onOpenChange={(open) =>
+                setDeleteConfirmId(open ? deleteConfirmId : null)
+              }
             >
               <AlertDialogContent>
                 <AlertDialogHeader>
                   <AlertDialogTitle>Delete Concert</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Are you sure you want to delete this concert? This action cannot be undone.
+                    Are you sure you want to delete this concert? This action
+                    cannot be undone.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -419,10 +441,12 @@ export function AdminConcertsPage() {
                     Cancel
                   </AlertDialogCancel>
                   <AlertDialogAction
-                    onClick={() => deleteConfirmId && handleDelete(deleteConfirmId)}
+                    onClick={() =>
+                      deleteConfirmId && handleDelete(deleteConfirmId)
+                    }
                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                   >
-                    {submittingId ? 'Deleting...' : 'Delete'}
+                    {submittingId ? "Deleting..." : "Delete"}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
