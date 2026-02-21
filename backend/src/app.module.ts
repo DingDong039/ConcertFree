@@ -30,7 +30,14 @@ import { ResponseInterceptor } from './common/interceptors/response.interceptor'
         password: config.get('DB_PASS', 'postgres'),
         database: config.get('DB_NAME', 'concert_db'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: config.get('NODE_ENV') !== 'production',
+        synchronize: false, // Use migrations instead
+        migrations: [__dirname + '/database/migrations/*{.ts,.js}'],
+        migrationsRun: config.get('NODE_ENV') === 'production',
+        logging: config.get('NODE_ENV') !== 'production',
+        extra: {
+          max: 50,
+          connectionTimeoutMillis: 5000,
+        },
       }),
     }),
 
