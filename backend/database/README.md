@@ -1,6 +1,6 @@
 # Database Migrations & Seeding
 
-This directory contains database migration and seed files for the Ticket Shop application.
+This directory contains database migration and seed files for the GigTix application.
 
 ## Directory Structure
 
@@ -59,18 +59,20 @@ npm run db:seed           # Insert seed data
 The seed data includes:
 
 ### Users (8 accounts)
-| Email | Name | Role | Password |
-|-------|------|------|----------|
-| admin@ticketshop.com | System Administrator | admin | password123 |
-| john.doe@email.com | John Doe | user | password123 |
-| jane.smith@email.com | Jane Smith | user | password123 |
-| mike.wilson@email.com | Mike Wilson | user | password123 |
-| sarah.johnson@email.com | Sarah Johnson | user | password123 |
-| david.brown@email.com | David Brown | user | password123 |
-| emma.davis@email.com | Emma Davis | user | password123 |
-| alex.martinez@email.com | Alex Martinez | user | password123 |
+
+| Email                   | Name                 | Role  | Password    |
+| ----------------------- | -------------------- | ----- | ----------- |
+| admin@ticketshop.com    | System Administrator | admin | password123 |
+| john.doe@email.com      | John Doe             | user  | password123 |
+| jane.smith@email.com    | Jane Smith           | user  | password123 |
+| mike.wilson@email.com   | Mike Wilson          | user  | password123 |
+| sarah.johnson@email.com | Sarah Johnson        | user  | password123 |
+| david.brown@email.com   | David Brown          | user  | password123 |
+| emma.davis@email.com    | Emma Davis           | user  | password123 |
+| alex.martinez@email.com | Alex Martinez        | user  | password123 |
 
 ### Concerts (15 events)
+
 - International artists (Taylor Swift, Coldplay, BTS, BLACKPINK, Metallica, Foo Fighters)
 - Classical music (Vienna Philharmonic, Beethoven Symphony)
 - Jazz (Jazz at Lincoln Center Orchestra)
@@ -79,12 +81,14 @@ The seed data includes:
 - Special events (Indie Music Festival, NYE Countdown Party)
 
 ### Reservations (15 records)
+
 - 13 active reservations
 - 2 cancelled reservations (for testing)
 
 ## PostgreSQL 16 Compatibility
 
 This seed file is compatible with PostgreSQL 16 and uses:
+
 - `uuid-ossp` extension for UUID generation
 - Native ENUM types for role and status fields
 - Standard timestamp columns
