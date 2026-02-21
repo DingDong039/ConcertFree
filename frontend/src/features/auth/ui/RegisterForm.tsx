@@ -1,12 +1,12 @@
 // frontend/src/features/auth/ui/RegisterForm.tsx
-'use client';
+"use client";
 
-import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { toast } from 'sonner';
-import { Mail, Lock, User, Loader2 } from 'lucide-react';
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { toast } from "sonner";
+import { Mail, Lock, User, Loader2 } from "lucide-react";
 import {
   Button,
   Input,
@@ -17,14 +17,14 @@ import {
   FormMessage,
   Form,
   Alert,
-} from '@/shared/ui';
-import { useAuthStore } from '../model';
-import { ROUTES } from '@/shared/config';
+} from "@/shared/ui";
+import { useAuthStore } from "../model";
+import { ROUTES } from "@/shared/config";
 
 const registerSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  email: z.string().email("Invalid email address"),
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
 type RegisterFormData = z.infer<typeof registerSchema>;
@@ -36,23 +36,24 @@ export function RegisterForm() {
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      email: '',
-      name: '',
-      password: '',
+      email: "",
+      name: "",
+      password: "",
     },
   });
 
   const onSubmit = async (data: RegisterFormData) => {
     try {
       await registerUser(data.email, data.name, data.password);
-      toast.success('Account created!', {
-        description: 'Welcome to Ticket Shop. You can now sign in.',
+      toast.success("Account created!", {
+        description: "Welcome to GigTix. You can now sign in.",
       });
       router.push(ROUTES.LOGIN);
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Registration failed';
+      const message =
+        err instanceof Error ? err.message : "Registration failed";
       setError(message);
-      toast.error('Registration failed', {
+      toast.error("Registration failed", {
         description: message,
       });
     }
@@ -139,7 +140,7 @@ export function RegisterForm() {
           disabled={isLoading}
         >
           {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-          {isLoading ? 'Creating account...' : 'Create Account'}
+          {isLoading ? "Creating account..." : "Create Account"}
         </Button>
       </form>
     </Form>

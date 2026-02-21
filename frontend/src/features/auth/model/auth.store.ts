@@ -1,19 +1,15 @@
 // frontend/src/features/auth/model/auth.store.ts
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import type { User } from '@/entities/user';
-import { STORAGE_KEYS, ROUTES } from '@/shared/config';
-import { authApi } from '../api';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import type { User } from "@/entities/user";
+import { STORAGE_KEYS, ROUTES } from "@/shared/config";
+import { authApi } from "../api";
 
 interface AuthState {
   user: User | null;
   token: string | null;
   isLoading: boolean;
   error: string | null;
-
-  // Computed
-  isAuthenticated: () => boolean;
-  isAdmin: () => boolean;
 
   // Actions
   login: (email: string, password: string) => Promise<void>;
@@ -32,16 +28,6 @@ export const useAuthStore = create<AuthState>()(
       isLoading: false,
       error: null,
 
-      isAuthenticated: () => {
-        const state = get();
-        return !!state.user && !!state.token;
-      },
-
-      isAdmin: () => {
-        const state = get();
-        return state.user?.role === 'admin';
-      },
-
       login: async (email, password) => {
         set({ isLoading: true, error: null });
         try {
@@ -53,19 +39,23 @@ export const useAuthStore = create<AuthState>()(
           });
 
           // Store token in localStorage for API requests
-          if (typeof window !== 'undefined') {
-            localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, response.accessToken);
+          if (typeof window !== "undefined") {
+            localStorage.setItem(
+              STORAGE_KEYS.ACCESS_TOKEN,
+              response.accessToken,
+            );
           }
 
           // Redirect based on role
-          if (typeof window !== 'undefined') {
-            const redirectPath = response.user.role === 'admin'
-              ? ROUTES.ADMIN_CONCERTS
-              : ROUTES.CONCERTS;
+          if (typeof window !== "undefined") {
+            const redirectPath =
+              response.user.role === "admin"
+                ? ROUTES.ADMIN_CONCERTS
+                : ROUTES.CONCERTS;
             window.location.href = redirectPath;
           }
         } catch (err) {
-          const message = err instanceof Error ? err.message : 'Login failed';
+          const message = err instanceof Error ? err.message : "Login failed";
           set({ error: message, isLoading: false });
           throw err;
         }
@@ -82,16 +72,20 @@ export const useAuthStore = create<AuthState>()(
           });
 
           // Store token in localStorage for API requests
-          if (typeof window !== 'undefined') {
-            localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, response.accessToken);
+          if (typeof window !== "undefined") {
+            localStorage.setItem(
+              STORAGE_KEYS.ACCESS_TOKEN,
+              response.accessToken,
+            );
           }
 
           // Redirect to concerts page
-          if (typeof window !== 'undefined') {
+          if (typeof window !== "undefined") {
             window.location.href = ROUTES.CONCERTS;
           }
         } catch (err) {
-          const message = err instanceof Error ? err.message : 'Registration failed';
+          const message =
+            err instanceof Error ? err.message : "Registration failed";
           set({ error: message, isLoading: false });
           throw err;
         }
@@ -101,12 +95,12 @@ export const useAuthStore = create<AuthState>()(
         set({ user: null, token: null, error: null });
 
         // Clear localStorage
-        if (typeof window !== 'undefined') {
+        if (typeof window !== "undefined") {
           localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
         }
 
         // Redirect to home
-        if (typeof window !== 'undefined') {
+        if (typeof window !== "undefined") {
           window.location.href = ROUTES.HOME;
         }
       },
@@ -118,7 +112,7 @@ export const useAuthStore = create<AuthState>()(
       setError: (error) => set({ error }),
     }),
     {
-      name: 'auth-storage',
+      name: "auth-storage",
       partialize: (state) => ({
         user: state.user,
         token: state.token,
@@ -129,7 +123,9 @@ export const useAuthStore = create<AuthState>()(
 
 // Convenience hooks
 export const useUser = () => useAuthStore((state) => state.user);
-export const useIsAuthenticated = () => useAuthStore((state) => state.isAuthenticated());
-export const useIsAdmin = () => useAuthStore((state) => state.isAdmin());
+export const useIsAuthenticated = () =>
+  useAuthStore((state) => !!state.user && !!state.token);
+export const useIsAdmin = () =>
+  useAuthStore((state) => state.user?.role === "admin");
 export const useAuthLoading = () => useAuthStore((state) => state.isLoading);
 export const useAuthError = () => useAuthStore((state) => state.error);

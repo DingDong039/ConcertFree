@@ -9,13 +9,12 @@ export interface Concert {
   updatedAt: string;
 }
 
-export interface CreateConcertPayload {
-  name: string;
-  description: string;
-  totalSeats: number;
-}
+export type CreateConcertPayload = Omit<
+  Concert,
+  "id" | "createdAt" | "updatedAt" | "availableSeats"
+>;
 
-export interface UpdateConcertPayload extends Partial<CreateConcertPayload> {}
+export type UpdateConcertPayload = Partial<CreateConcertPayload>;
 
 export const isSoldOut = (concert: Concert): boolean => {
   return concert.availableSeats === 0;
