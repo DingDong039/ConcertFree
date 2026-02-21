@@ -2,7 +2,7 @@
 // Auto-generated exports for shadcn/ui components
 
 // Button
-export { Button, buttonVariants } from './button';
+export { Button, buttonVariants } from "./button";
 
 // Card
 export {
@@ -13,19 +13,19 @@ export {
   CardAction,
   CardDescription,
   CardContent,
-} from './card';
+} from "./card";
 
 // Input
-export { Input } from './input';
+export { Input } from "./input";
 
 // Badge
-export { Badge, badgeVariants } from './badge';
+export { Badge, badgeVariants } from "./badge";
 
 // Label
-export { Label } from './label';
+export { Label } from "./label";
 
 // Skeleton
-export { Skeleton } from './skeleton';
+export { Skeleton } from "./skeleton";
 
 // Dialog
 export {
@@ -39,7 +39,7 @@ export {
   DialogFooter,
   DialogTitle,
   DialogDescription,
-} from './dialog';
+} from "./dialog";
 
 // Form (react-hook-form + zod)
 export {
@@ -51,7 +51,7 @@ export {
   FormDescription,
   FormMessage,
   FormField,
-} from './form';
+} from "./form";
 
 // Table
 export {
@@ -63,7 +63,7 @@ export {
   TableRow,
   TableCell,
   TableCaption,
-} from './table';
+} from "./table";
 
 // Sheet
 export {
@@ -75,7 +75,7 @@ export {
   SheetFooter,
   SheetTitle,
   SheetDescription,
-} from './sheet';
+} from "./sheet";
 
 // Dropdown Menu
 export {
@@ -94,19 +94,19 @@ export {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuRadioGroup,
-} from './dropdown-menu';
+} from "./dropdown-menu";
 
 // Avatar
-export { Avatar, AvatarImage, AvatarFallback } from './avatar';
+export { Avatar, AvatarImage, AvatarFallback } from "./avatar";
 
 // Separator
-export { Separator } from './separator';
+export { Separator } from "./separator";
 
 // Alert
-export { Alert, AlertTitle, AlertDescription } from './alert';
+export { Alert, AlertTitle, AlertDescription } from "./alert";
 
 // Progress
-export { Progress } from './progress';
+export { Progress } from "./progress";
 
 // Alert Dialog
 export {
@@ -121,7 +121,12 @@ export {
   AlertDialogDescription,
   AlertDialogAction,
   AlertDialogCancel,
-} from './alert-dialog';
+} from "./alert-dialog";
 
 // Sonner (Toast)
-export { Toaster } from './sonner';
+export { Toaster } from "./sonner";
+
+// Illustrations
+export * from "./interactive-logo";
+export * from "./isometric-transaction";
+export * from "./isometric-stage";
