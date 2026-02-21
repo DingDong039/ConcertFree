@@ -34,6 +34,10 @@ import { ResponseInterceptor } from './common/interceptors/response.interceptor'
         migrations: [__dirname + '/database/migrations/*{.ts,.js}'],
         migrationsRun: config.get('NODE_ENV') === 'production',
         logging: config.get('NODE_ENV') !== 'production',
+        extra: {
+          max: 50,
+          connectionTimeoutMillis: 5000,
+        },
       }),
     }),
 

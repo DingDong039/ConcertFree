@@ -15,6 +15,10 @@ export const dataSourceOptions: DataSourceOptions = {
   migrations: ['src/database/migrations/*{.ts,.js}'],
   synchronize: false, // Always false for migrations
   logging: process.env.NODE_ENV !== 'production',
+  extra: {
+    max: 50,
+    connectionTimeoutMillis: 5000,
+  },
 };
 
 const dataSource = new DataSource(dataSourceOptions);
