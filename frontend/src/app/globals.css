@@ -155,8 +155,8 @@ h6 {
   --secondary-foreground: #ffffff;
   --muted: #f1f5f9;
   --muted-foreground: #64748b;
-  --accent: #f97316;
-  --accent-foreground: #ffffff;
+  --accent: #dbeafe; /* light blue for hover */
+  --accent-foreground: #1e40af; /* dark blue text */
   --destructive: #ef4444;
   --border: #e2e8f0;
   --input: #e2e8f0;
@@ -190,8 +190,8 @@ h6 {
   --secondary-foreground: #0f172a;
   --muted: #334155;
   --muted-foreground: #94a3b8;
-  --accent: #fb923c;
-  --accent-foreground: #0f172a;
+  --accent: #1e3a8a; /* dark blue for hover */
+  --accent-foreground: #f1f5f9; /* light text */
   --destructive: #f87171;
   --border: #334155;
   --input: #475569;
