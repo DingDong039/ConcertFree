@@ -39,6 +39,18 @@ export class ReservationsRepository {
     });
   }
 
+  async findByUserAndConcert(
+    userId: string,
+    concertId: string,
+  ): Promise<Reservation | null> {
+    return this.repo.findOne({
+      where: {
+        userId,
+        concertId,
+      },
+    });
+  }
+
   async findAllByUser(userId: string): Promise<Reservation[]> {
     return this.repo.find({
       where: { userId },
@@ -47,10 +59,55 @@ export class ReservationsRepository {
     });
   }
 
-  async findAll(): Promise<Reservation[]> {
-    return this.repo.find({
-      relations: ['user', 'concert'],
+  async findPaginatedByUser(
+    userId: string,
+    page: number,
+    limit: number,
+  ): Promise<[Reservation[], number]> {
+    return this.repo.findAndCount({
+      where: { userId },
+      relations: ['concert'],
       order: { createdAt: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
     });
+  }
+
+  async findAll(search?: string): Promise<Reservation[]> {
+    const qb = this.repo
+      .createQueryBuilder('reservation')
+      .leftJoinAndSelect('reservation.user', 'user')
+      .leftJoinAndSelect('reservation.concert', 'concert')
+      .orderBy('reservation.createdAt', 'DESC');
+
+    if (search) {
+      qb.where('user.name ILIKE :search OR user.email ILIKE :search', {
+        search: `%${search}%`,
+      });
+    }
+
+    return qb.getMany();
+  }
+
+  async findPaginated(
+    page: number,
+    limit: number,
+    search?: string,
+  ): Promise<[Reservation[], number]> {
+    const qb = this.repo
+      .createQueryBuilder('reservation')
+      .leftJoinAndSelect('reservation.user', 'user')
+      .leftJoinAndSelect('reservation.concert', 'concert')
+      .orderBy('reservation.createdAt', 'DESC')
+      .skip((page - 1) * limit)
+      .take(limit);
+
+    if (search) {
+      qb.where('user.name ILIKE :search OR user.email ILIKE :search', {
+        search: `%${search}%`,
+      });
+    }
+
+    return qb.getManyAndCount();
   }
 }

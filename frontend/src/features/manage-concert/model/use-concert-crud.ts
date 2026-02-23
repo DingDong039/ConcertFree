@@ -20,9 +20,9 @@ export function useConcertCrud() {
     setError(null);
 
     try {
-      const concerts = await concertApi.getAll();
-      setConcerts(concerts);
-      return concerts;
+      const response = await concertApi.getAll();
+      setConcerts(response.data);
+      return response.data;
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to fetch concerts';
       setError(message);

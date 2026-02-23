@@ -1,7 +1,8 @@
-// backend/src/modules/reservations/dto/reservation.dto.ts
-import { IsUUID } from 'class-validator';
+import { Matches } from 'class-validator';
 
 export class CreateReservationDto {
-  @IsUUID()
+  @Matches(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i, {
+    message: 'concertId must be a UUID',
+  })
   concertId: string;
 }

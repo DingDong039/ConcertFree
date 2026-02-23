@@ -1,7 +1,7 @@
 // frontend/src/entities/reservation/ui/ReservationCard.tsx
 'use client';
 
-import { Calendar, Ticket, XCircle } from 'lucide-react';
+import { Calendar, XCircle } from 'lucide-react';
 import type { Reservation } from '../model';
 import {
   Card,

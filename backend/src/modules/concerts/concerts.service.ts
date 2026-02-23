@@ -27,10 +27,12 @@ export class ConcertsService {
   async findPaginated(
     page: number,
     limit: number,
+    search?: string,
   ): Promise<{ data: Concert[]; total: number; page: number; limit: number }> {
     const [data, total] = await this.concertsRepository.findPaginated(
       page,
       limit,
+      search,
     );
     return {
       data,

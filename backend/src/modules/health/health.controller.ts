@@ -28,7 +28,8 @@ export class HealthController {
       // Memory check - RSS should not exceed 150MB
       () => this.memory.checkRSS('memory_rss', 150 * 1024 * 1024),
       // Disk check - storage path should have at least 1GB free
-      () => this.disk.checkStorage('disk', { thresholdPercent: 0.9, path: '/' }),
+      () =>
+        this.disk.checkStorage('disk', { thresholdPercent: 0.9, path: '/' }),
     ]);
   }
 
@@ -45,8 +46,6 @@ export class HealthController {
   @HealthCheck()
   readiness() {
     // Full check for Kubernetes readiness probe
-    return this.health.check([
-      () => this.db.pingCheck('database'),
-    ]);
+    return this.health.check([() => this.db.pingCheck('database')]);
   }
 }

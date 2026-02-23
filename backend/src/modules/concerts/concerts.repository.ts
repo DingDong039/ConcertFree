@@ -1,7 +1,7 @@
 // backend/src/modules/concerts/concerts.repository.ts
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, ILike } from 'typeorm';
 import { Concert } from './entities/concert.entity';
 
 @Injectable()
@@ -26,8 +26,15 @@ export class ConcertsRepository {
   async findPaginated(
     page: number,
     limit: number,
+    search?: string,
   ): Promise<[Concert[], number]> {
     return this.repo.findAndCount({
+      where: search
+        ? [
+            { name: ILike(`%${search}%`) },
+            { description: ILike(`%${search}%`) },
+          ]
+        : {},
       order: { createdAt: 'DESC' },
       skip: (page - 1) * limit,
       take: limit,

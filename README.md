@@ -23,6 +23,23 @@ concert-ticket-reservation-system/
 
 ---
 
+## ✨ Key Features
+
+- **Full-Stack Application**: Built with Next.js 16 (App Router) & NestJS 11.
+- **Authentication**: JWT-based authentication with Role-Based Access Control (Admin/User).
+- **Responsive & Dark Mode UI**: Modern, responsive design using Tailwind CSS with full dark mode support.
+- **Improved UX**: Custom loading skeletons, dynamic empty states, and interactive toast notifications (Sonner).
+- **High Performance API**:
+  - **Pagination** for efficient data fetching.
+  - **Response Compression** (Gzip) to minimize payload size.
+  - **Rate Limiting** to protect endpoints against bot scripts.
+- **Robust Database Execution**:
+  - **Atomic Operations** to prevent race conditions and overbooking during high-traffic ticket sales.
+  - **Database Indexes** for optimized query performance.
+- **Unit Testing**: Comprehensive unit tests covering business logic and edge cases via Jest.
+
+---
+
 ## 🏗 Architecture Overview
 
 ```
@@ -78,6 +95,7 @@ docker compose up -d
 
 ```bash
 cd backend
+cp .env.example .env
 npm install
 npm run start:dev         # → http://localhost:4000/api/v1
 ```
@@ -140,11 +158,12 @@ npm run db:reset           # Revert + re-run migrations
 
 ```bash
 cd frontend
+cp .env.example .env
 npm install
 npm run dev               # → http://localhost:3000
 ```
 
-**Environment variables** (`.env.local`):
+**Environment variables** (`.env`):
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:4000/api/v1
@@ -222,6 +241,27 @@ After running `npm run db:seed`, you'll have:
 │ updatedAt   │                                  │ updatedAt   │
 └─────────────┘                                  └─────────────┘
 ```
+
+---
+
+## 🏗 System Architecture Considerations (High-Concurrency)
+
+When handling flash sales (e.g., BLACKPINK concerts) where thousands of users access the system simultaneously, the following architectural improvements should be considered:
+
+1. **Database Bottlenecks (Row-level Locking):**
+   - **Current Implementation:** `UPDATE concerts SET availableSeats = availableSeats - 1` utilizes row-level locking, which works safely but forces requests to queue up sequentially. Under extreme load, this will cause database timeouts.
+   - **Production Solution:** Implement **Redis** (In-Memory Database) to manage ticket inventory via atomic `DECR` operations which process at 100x the speed of relational databases. A Message Broker (e.g., Kafka / RabbitMQ) can then be used to persist the reservations asynchronously back to PostgreSQL.
+
+2. **State Management & Payment Verification (Hold Time):**
+   - **Current Implementation:** A reservation immediately gets marked as `ACTIVE` and `availableSeats` is deducted.
+   - **Production Solution:** Implement a `PENDING_PAYMENT` state alongside a **15-Minute Expiry Window** (using Redis TTL or a Scheduled Cron Job). If payment is not completed in time, the reservation is marked `CANCELLED` and the seat is returned to the pool automatically.
+
+3. **API Rate Limiting (Bot Protection):**
+   - Use an API Gateway or framework-level Throttler (e.g., NestJS `ThrottlerModule`) to limit endpoints (e.g., max 5 booking requests per IP per minute) to prevent bot scripts from exhausting server resources and hoarding seats.
+
+4. **Real-time UX Updates:**
+   - **Current Implementation:** Users must reload the page or click a button to see if seats were taken by others.
+   - **Production Solution:** Utilize **WebSockets (Socket.io)** or **Server-Sent Events (SSE)** to broadcast inventory changes to connected clients over the UI, creating a dynamic, real-time experience.
 
 ---
 

@@ -27,8 +27,20 @@ export async function request<T>(
 ): Promise<T> {
   const token = getToken();
 
+  // Try to use toast if available in browser
+  let toast: unknown = null;
+  if (typeof window !== "undefined") {
+    try {
+      const sonner = await import("sonner");
+      toast = sonner.toast;
+    } catch {
+      // sonner not available or error importing
+    }
+  }
+
   const res = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
+    credentials: options.credentials || "include",
     headers: {
       "Content-Type": "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -41,6 +53,14 @@ export async function request<T>(
     const msg = Array.isArray(error.message?.message)
       ? error.message.message.join(", ")
       : error.message?.message || error.message || "Request failed";
+    
+    // Global client-side error handling
+    if (toast && typeof (toast as { error: unknown }).error === 'function') {
+      ((toast as { error: (msg: string, opts: Record<string, unknown>) => void }).error)("Error", { description: msg });
+    } else if (typeof toast === 'function') {
+      (toast as (msg: string, opts: Record<string, unknown>) => void)("Error", { description: msg });
+    }
+    
     throw new Error(msg);
   }
 

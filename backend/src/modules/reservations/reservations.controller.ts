@@ -10,6 +10,9 @@ import {
   ParseUUIDPipe,
   HttpCode,
   HttpStatus,
+  Query,
+  DefaultValuePipe,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { ReservationsService } from './reservations.service';
 import { CreateReservationDto } from './dto/reservation.dto';
@@ -37,14 +40,32 @@ export class ReservationsController {
   }
 
   @Get('me')
-  myReservations(@CurrentUser() user: User) {
+  myReservations(
+    @CurrentUser() user: User,
+    @Query('page', new DefaultValuePipe(0), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(0), ParseIntPipe) limit: number,
+  ) {
+    if (page > 0 && limit > 0) {
+      return this.reservationsService.findMyReservationsPaginated(
+        user.id,
+        page,
+        limit,
+      );
+    }
     return this.reservationsService.findMyReservations(user.id);
   }
 
   @Get()
   @Roles(Role.ADMIN)
   @UseGuards(RolesGuard)
-  findAll() {
-    return this.reservationsService.findAll();
+  findAll(
+    @Query('page', new DefaultValuePipe(0), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(0), ParseIntPipe) limit: number,
+    @Query('search') search?: string,
+  ) {
+    if (page > 0 && limit > 0) {
+      return this.reservationsService.findAllPaginated(page, limit, search);
+    }
+    return this.reservationsService.findAll(search);
   }
 }

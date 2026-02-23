@@ -5,7 +5,8 @@ import { useState, useCallback } from "react";
 import { toast } from "sonner";
 import { reservationApi } from "@/entities/reservation";
 import { mutate } from "swr";
-import { useReservationStore } from "@/entities/reservation";
+import { useReservationStore, type Reservation } from "@/entities/reservation";
+import type { PaginatedResponse } from "@/shared/api";
 
 export function useReserve() {
   const [isReserving, setIsReserving] = useState(false);
@@ -14,6 +15,7 @@ export function useReserve() {
 
   const reserve = useCallback(
     async (concertId: string) => {
+      if (isReserving) return;
       setIsReserving(true);
       setError(null);
 
@@ -21,14 +23,26 @@ export function useReserve() {
         const reservation = await reservationApi.reserve(concertId);
         addReservation(reservation);
 
-        // Invalidate related SWR caches
-        mutate("/concerts");
-        mutate("/reservations/me");
-        mutate("/admin/reservations");
+        // Optimistically update the SWR cache for /reservations/me
+        mutate(
+          (key: string) => typeof key === 'string' && key.startsWith('/reservations/me'),
+          (currentData: PaginatedResponse<Reservation> | undefined) => {
+            if (!currentData) return currentData;
+            return {
+              ...currentData,
+              data: [reservation, ...(currentData.data || [])],
+              total: (currentData.total || 0) + 1,
+            };
+          },
+          false // Don't revalidate immediately to prevent flashing
+        );
+
+        // Invalidate other related SWR caches
+        mutate((key: string) => typeof key === 'string' && key.startsWith('/concerts'));
+        mutate((key: string) => typeof key === 'string' && key.startsWith('/admin/reservations'));
 
         toast.success("Reservation successful!", {
-          description:
-            "Your ticket has been booked. Check your email for confirmation.",
+          description: `Time: ${new Date().toLocaleString()}`,
         });
         return reservation;
       } catch (err) {
@@ -43,7 +57,7 @@ export function useReserve() {
         setIsReserving(false);
       }
     },
-    [addReservation],
+    [addReservation, isReserving],
   );
 
   return {

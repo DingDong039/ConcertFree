@@ -30,10 +30,11 @@ export class ConcertsController {
   findAll(
     @Query('page', new DefaultValuePipe(0), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(0), ParseIntPipe) limit: number,
+    @Query('search') search?: string,
   ) {
     // ถ้ามี page/limit ส่งมา → paginated, ไม่มี → คืนทั้งหมด
     if (page > 0 && limit > 0) {
-      return this.concertsService.findPaginated(page, limit);
+      return this.concertsService.findPaginated(page, limit, search);
     }
     return this.concertsService.findAll();
   }
