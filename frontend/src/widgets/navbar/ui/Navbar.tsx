@@ -37,16 +37,8 @@ import { cn } from "@/shared/lib";
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isDark, setIsDark] = useState(() => {
-    if (typeof window === "undefined") {
-      return false; // Default to light on server-side rendering
-    }
-    const savedTheme = localStorage.getItem("theme");
-    const prefersDark = window.matchMedia(
-      "(prefers-color-scheme: dark)",
-    ).matches;
-    return savedTheme === "dark" || (!savedTheme && prefersDark);
-  });
+  const [isDark, setIsDark] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
   const isAuthenticated = useIsAuthenticated();
   const isAdmin = useIsAdmin();
@@ -62,14 +54,30 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Initialize theme on mount to avoid hydration mismatch
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
+    const savedTheme = localStorage.getItem("theme");
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const initialDark = savedTheme === "dark" || (!savedTheme && prefersDark);
+    setIsDark(initialDark);
+    
+    // Initial DOM setup if requested dark mode
+    if (initialDark) {
+      document.documentElement.classList.add("dark");
+    }
+  }, []);
+
   // Update DOM class safely
   useEffect(() => {
+    if (!mounted) return;
     if (isDark) {
       document.documentElement.classList.add("dark");
     } else {
       document.documentElement.classList.remove("dark");
     }
-  }, [isDark]);
+  }, [isDark, mounted]);
 
   const toggleTheme = () => {
     const newIsDark = !isDark;
@@ -155,7 +163,9 @@ export function Navbar() {
               className="rounded-full"
               aria-label="Toggle theme"
             >
-              {isDark ? (
+              {!mounted ? (
+                <div className="w-5 h-5" />
+              ) : isDark ? (
                 <Sun className="w-5 h-5" />
               ) : (
                 <Moon className="w-5 h-5" />
@@ -218,7 +228,9 @@ export function Navbar() {
               className="rounded-full"
               aria-label="Toggle theme"
             >
-              {isDark ? (
+              {!mounted ? (
+                <div className="w-5 h-5" />
+              ) : isDark ? (
                 <Sun className="w-5 h-5" />
               ) : (
                 <Moon className="w-5 h-5" />
