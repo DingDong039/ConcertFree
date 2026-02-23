@@ -14,4 +14,9 @@ export const authApi = {
       method: 'POST',
       body: JSON.stringify(credentials),
     }),
+
+  logout: () =>
+    request<{ success: boolean }>('/auth/logout', {
+      method: 'POST',
+    }),
 };

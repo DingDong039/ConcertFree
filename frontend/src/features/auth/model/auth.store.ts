@@ -2,7 +2,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { User } from "@/entities/user";
-import { STORAGE_KEYS, ROUTES } from "@/shared/config";
+import { ROUTES } from "@/shared/config";
 import { authApi } from "../api";
 
 interface AuthState {
@@ -33,23 +33,16 @@ export const useAuthStore = create<AuthState>()(
         try {
           const response = await authApi.login({ email, password });
           set({
-            user: response.user,
-            token: response.accessToken,
+            user: response,
+            // Token is now handled via HttpOnly cookie
+            token: "cookie-handled", 
             isLoading: false,
           });
-
-          // Store token in localStorage for API requests
-          if (typeof window !== "undefined") {
-            localStorage.setItem(
-              STORAGE_KEYS.ACCESS_TOKEN,
-              response.accessToken,
-            );
-          }
 
           // Redirect based on role
           if (typeof window !== "undefined") {
             const redirectPath =
-              response.user.role === "admin"
+              response.role === "admin"
                 ? ROUTES.ADMIN_CONCERTS
                 : ROUTES.CONCERTS;
             window.location.href = redirectPath;
@@ -66,18 +59,10 @@ export const useAuthStore = create<AuthState>()(
         try {
           const response = await authApi.register({ email, name, password });
           set({
-            user: response.user,
-            token: response.accessToken,
+            user: response,
+            token: "cookie-handled",
             isLoading: false,
           });
-
-          // Store token in localStorage for API requests
-          if (typeof window !== "undefined") {
-            localStorage.setItem(
-              STORAGE_KEYS.ACCESS_TOKEN,
-              response.accessToken,
-            );
-          }
 
           // Redirect to concerts page
           if (typeof window !== "undefined") {
@@ -91,12 +76,14 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      logout: () => {
+      logout: async () => {
         set({ user: null, token: null, error: null });
-
-        // Clear localStorage
-        if (typeof window !== "undefined") {
-          localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
+        
+        try {
+          // Call the backend to clear the cookie
+          await authApi.logout();
+        } catch (err) {
+          console.error("Logout error", err);
         }
 
         // Redirect to home
@@ -115,6 +102,7 @@ export const useAuthStore = create<AuthState>()(
       name: "auth-storage",
       partialize: (state) => ({
         user: state.user,
+        // we map token so that useIsAuthenticated still works
         token: state.token,
       }),
     },

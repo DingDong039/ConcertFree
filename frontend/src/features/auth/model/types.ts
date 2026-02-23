@@ -19,7 +19,4 @@ export interface RegisterCredentials {
   password: string;
 }
 
-export interface AuthResponse {
-  accessToken: string;
-  user: User;
-}
+export type AuthResponse = User;
