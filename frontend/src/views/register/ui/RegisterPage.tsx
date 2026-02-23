@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Music, Ticket, CheckCircle } from 'lucide-react';
+import { Music, CheckCircle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui';
 import { RegisterForm } from '@/features/auth';
 import { ROUTES, APP_NAME } from '@/shared/config';

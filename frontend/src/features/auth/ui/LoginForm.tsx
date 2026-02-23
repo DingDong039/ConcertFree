@@ -1,7 +1,6 @@
 // frontend/src/features/auth/ui/LoginForm.tsx
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -70,7 +69,6 @@ export function LoginForm() {
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
-                    placeholder="you@example.com"
                     className="pl-10"
                     type="email"
                     {...field}
@@ -92,7 +90,6 @@ export function LoginForm() {
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
-                    placeholder="••••••••"
                     className="pl-10"
                     type="password"
                     {...field}
