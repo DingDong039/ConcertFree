@@ -190,7 +190,7 @@ export function HomePage({ initialConcerts = [] }: HomePageProps) {
           </div>
 
           <div className="mt-16 bg-slate-50 dark:bg-slate-900/60 backdrop-blur-sm rounded-3xl p-8 lg:p-12 border border-slate-200 dark:border-slate-800/60 hidden sm:block relative overflow-hidden group">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+            <div className="absolute inset-0 bg-linear-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
 
             <div className="text-center mb-0 relative z-10">
               <h3 className="text-3xl font-bold font-heading mb-4">
@@ -280,7 +280,7 @@ export function HomePage({ initialConcerts = [] }: HomePageProps) {
       {/* CTA Section */}
       <section className="py-16 lg:py-24 px-4">
         <div className="max-w-4xl mx-auto">
-          <Card className="bg-gradient-to-r from-primary to-blue-600 border-0 text-white overflow-hidden relative">
+          <Card className="bg-linear-to-r from-primary to-blue-600 border-0 text-white overflow-hidden relative">
             {/* Background decoration */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
               <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/4" />
