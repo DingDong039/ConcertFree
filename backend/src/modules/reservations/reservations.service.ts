@@ -36,16 +36,31 @@ export class ReservationsService {
         throw new BadRequestException('No seats available for this concert');
       }
 
-      const existing =
-        await this.reservationsRepository.findActiveByUserAndConcert(
-          user.id,
-          dto.concertId,
-        );
+      const existing = await this.reservationsRepository.findByUserAndConcert(
+        user.id,
+        dto.concertId,
+      );
 
       if (existing) {
-        throw new ConflictException(
-          'You already have an active reservation for this concert',
-        );
+        if (existing.status === ReservationStatus.ACTIVE) {
+          throw new ConflictException(
+            'You already have an active reservation for this concert',
+          );
+        }
+
+        if (existing.status === ReservationStatus.CANCELLED) {
+          const cooldownDurationMs = 10 * 60 * 1000;
+          const timeSinceCancelMs = Date.now() - existing.updatedAt.getTime();
+
+          if (timeSinceCancelMs < cooldownDurationMs) {
+            const timeRemaining = Math.ceil(
+              (cooldownDurationMs - timeSinceCancelMs) / 60000,
+            );
+            throw new BadRequestException(
+              `Please wait ${timeRemaining} minute(s) before re-booking this concert`,
+            );
+          }
+        }
       }
 
       // Atomic seat decrement — only succeeds if a seat is truly available
@@ -60,6 +75,12 @@ export class ReservationsService {
         throw new BadRequestException(
           'No seats available (race condition prevented)',
         );
+      }
+
+      if (existing) {
+        // If the reservation was previously cancelled, reactivate it
+        existing.status = ReservationStatus.ACTIVE;
+        return manager.save(existing);
       }
 
       const reservation = this.reservationsRepository.create({
@@ -110,7 +131,43 @@ export class ReservationsService {
     return this.reservationsRepository.findAllByUser(userId);
   }
 
-  async findAll(): Promise<Reservation[]> {
-    return this.reservationsRepository.findAll();
+  async findMyReservationsPaginated(
+    userId: string,
+    page: number,
+    limit: number,
+  ): Promise<{
+    data: Reservation[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
+    const [data, total] = await this.reservationsRepository.findPaginatedByUser(
+      userId,
+      page,
+      limit,
+    );
+    return { data, total, page, limit };
+  }
+
+  async findAll(search?: string): Promise<Reservation[]> {
+    return this.reservationsRepository.findAll(search);
+  }
+
+  async findAllPaginated(
+    page: number,
+    limit: number,
+    search?: string,
+  ): Promise<{
+    data: Reservation[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
+    const [data, total] = await this.reservationsRepository.findPaginated(
+      page,
+      limit,
+      search,
+    );
+    return { data, total, page, limit };
   }
 }

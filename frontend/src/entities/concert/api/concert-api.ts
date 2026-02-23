@@ -1,9 +1,17 @@
 // frontend/src/entities/concert/api/concert-api.ts
-import { request } from '@/shared/api';
+import { request, PaginatedResponse } from '@/shared/api';
 import type { Concert, CreateConcertPayload, UpdateConcertPayload } from '../model';
 
 export const concertApi = {
-  getAll: () => request<Concert[]>('/concerts'),
+  getAll: (page?: number, limit?: number, search?: string) => {
+    const params = new URLSearchParams();
+    if (page) params.append('page', page.toString());
+    if (limit) params.append('limit', limit.toString());
+    if (search) params.append('search', search);
+
+    const queryString = params.toString() ? `?${params.toString()}` : '';
+    return request<PaginatedResponse<Concert>>(`/concerts${queryString}`);
+  },
 
   getOne: (id: string) => request<Concert>(`/concerts/${id}`),
 

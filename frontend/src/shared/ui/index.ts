@@ -130,3 +130,14 @@ export { Toaster } from "./sonner";
 export * from "./interactive-logo";
 export * from "./isometric-transaction";
 export * from "./isometric-stage";
+
+// Pagination
+export {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationButton,
+  PaginationPrevious,
+  PaginationNext,
+  PaginationEllipsis,
+} from "./pagination";
