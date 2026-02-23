@@ -23,6 +23,23 @@ concert-ticket-reservation-system/
 
 ---
 
+## ✨ Key Features
+
+- **Full-Stack Application**: Built with Next.js 16 (App Router) & NestJS 11.
+- **Authentication**: JWT-based authentication with Role-Based Access Control (Admin/User).
+- **Responsive & Dark Mode UI**: Modern, responsive design using Tailwind CSS with full dark mode support.
+- **Improved UX**: Custom loading skeletons, dynamic empty states, and interactive toast notifications (Sonner).
+- **High Performance API**:
+  - **Pagination** for efficient data fetching.
+  - **Response Compression** (Gzip) to minimize payload size.
+  - **Rate Limiting** to protect endpoints against bot scripts.
+- **Robust Database Execution**:
+  - **Atomic Operations** to prevent race conditions and overbooking during high-traffic ticket sales.
+  - **Database Indexes** for optimized query performance.
+- **Unit Testing**: Comprehensive unit tests covering business logic and edge cases via Jest.
+
+---
+
 ## 🏗 Architecture Overview
 
 ```
@@ -78,6 +95,7 @@ docker compose up -d
 
 ```bash
 cd backend
+cp .env.example .env
 npm install
 npm run start:dev         # → http://localhost:4000/api/v1
 ```
@@ -140,11 +158,12 @@ npm run db:reset           # Revert + re-run migrations
 
 ```bash
 cd frontend
+cp .env.example .env
 npm install
 npm run dev               # → http://localhost:3000
 ```
 
-**Environment variables** (`.env.local`):
+**Environment variables** (`.env`):
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:4000/api/v1
