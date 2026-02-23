@@ -225,6 +225,27 @@ After running `npm run db:seed`, you'll have:
 
 ---
 
+## 🏗 System Architecture Considerations (High-Concurrency)
+
+When handling flash sales (e.g., BLACKPINK concerts) where thousands of users access the system simultaneously, the following architectural improvements should be considered:
+
+1. **Database Bottlenecks (Row-level Locking):**
+   - **Current Implementation:** `UPDATE concerts SET availableSeats = availableSeats - 1` utilizes row-level locking, which works safely but forces requests to queue up sequentially. Under extreme load, this will cause database timeouts.
+   - **Production Solution:** Implement **Redis** (In-Memory Database) to manage ticket inventory via atomic `DECR` operations which process at 100x the speed of relational databases. A Message Broker (e.g., Kafka / RabbitMQ) can then be used to persist the reservations asynchronously back to PostgreSQL.
+
+2. **State Management & Payment Verification (Hold Time):**
+   - **Current Implementation:** A reservation immediately gets marked as `ACTIVE` and `availableSeats` is deducted.
+   - **Production Solution:** Implement a `PENDING_PAYMENT` state alongside a **15-Minute Expiry Window** (using Redis TTL or a Scheduled Cron Job). If payment is not completed in time, the reservation is marked `CANCELLED` and the seat is returned to the pool automatically.
+
+3. **API Rate Limiting (Bot Protection):**
+   - Use an API Gateway or framework-level Throttler (e.g., NestJS `ThrottlerModule`) to limit endpoints (e.g., max 5 booking requests per IP per minute) to prevent bot scripts from exhausting server resources and hoarding seats.
+
+4. **Real-time UX Updates:**
+   - **Current Implementation:** Users must reload the page or click a button to see if seats were taken by others.
+   - **Production Solution:** Utilize **WebSockets (Socket.io)** or **Server-Sent Events (SSE)** to broadcast inventory changes to connected clients over the UI, creating a dynamic, real-time experience.
+
+---
+
 ## 🧪 Running Unit Tests
 
 ```bash

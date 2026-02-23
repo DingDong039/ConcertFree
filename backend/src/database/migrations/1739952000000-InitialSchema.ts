@@ -1,5 +1,11 @@
 // backend/src/database/migrations/1739952000000-InitialSchema.ts
-import { MigrationInterface, QueryRunner, Table, TableIndex, TableForeignKey } from 'typeorm';
+import {
+  MigrationInterface,
+  QueryRunner,
+  Table,
+  TableIndex,
+  TableForeignKey,
+} from 'typeorm';
 
 export class InitialSchema1739952000000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {

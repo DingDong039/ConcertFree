@@ -99,7 +99,7 @@ export function HomePage() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-12 px-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
+      <section className="py-12 px-4 bg-white dark:bg-slate-900/40 border-b border-slate-200 dark:border-slate-800/50 backdrop-blur-md relative z-20">
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
@@ -123,7 +123,7 @@ export function HomePage() {
       </section>
 
       {/* Features Section */}
-      <section className="py-16 lg:py-24 px-4">
+      <section className="py-16 lg:py-24 px-4 relative z-10">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-heading font-bold mb-4">
@@ -163,7 +163,7 @@ export function HomePage() {
             ].map((feature, index) => (
               <Card
                 key={index}
-                className="concert-card border-slate-200 dark:border-slate-700"
+                className="concert-card border-slate-200 dark:border-slate-800/60 bg-white dark:bg-slate-900/60 backdrop-blur-sm"
               >
                 <CardContent className="pt-8 text-center">
                   <div
@@ -180,7 +180,7 @@ export function HomePage() {
             ))}
           </div>
 
-          <div className="mt-16 bg-slate-50 dark:bg-slate-800/50 rounded-3xl p-8 lg:p-12 border border-slate-200 dark:border-slate-800 hidden sm:block relative overflow-hidden group">
+          <div className="mt-16 bg-slate-50 dark:bg-slate-900/60 backdrop-blur-sm rounded-3xl p-8 lg:p-12 border border-slate-200 dark:border-slate-800/60 hidden sm:block relative overflow-hidden group">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
 
             <div className="text-center mb-0 relative z-10">
@@ -201,7 +201,7 @@ export function HomePage() {
       </section>
 
       {/* Featured Concerts Section */}
-      <section className="py-16 lg:py-24 px-4 bg-muted/30">
+      <section className="py-16 lg:py-24 px-4 bg-slate-50 dark:bg-slate-900/20 border-t border-slate-200 dark:border-slate-800/50">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-12">
             <div>
@@ -244,7 +244,7 @@ export function HomePage() {
               ))}
             </div>
           ) : (
-            <Card className="text-center py-12">
+            <Card className="text-center py-12 bg-white dark:bg-slate-900/50 backdrop-blur-sm border-slate-200 dark:border-slate-800/50">
               <CardContent>
                 <Music className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
                 <p className="text-muted-foreground mb-4">
@@ -304,7 +304,7 @@ export function HomePage() {
       <section className="relative z-0 mt-8 mb-20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center pt-10">
           <div className="inline-block animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300 fill-mode-both">
-            <h2 className="text-3xl md:text-5xl font-black font-heading mb-4 text-emerald-950 dark:text-emerald-50">
+            <h2 className="text-3xl md:text-5xl font-black font-heading mb-4 text-emerald-950 dark:text-emerald-400">
               The Stage is Yours
             </h2>
             <p className="text-lg text-emerald-800 dark:text-emerald-200/70 max-w-2xl mx-auto mb-8">
