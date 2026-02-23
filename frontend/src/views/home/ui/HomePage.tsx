@@ -28,10 +28,19 @@ import { ConcertCard } from "@/widgets/concert-card";
 import useSWR from "swr";
 import { fetcher } from "@/shared/api";
 
-export function HomePage() {
+interface HomePageProps {
+  initialConcerts?: Concert[];
+}
+
+export function HomePage({ initialConcerts = [] }: HomePageProps) {
   const isAuthenticated = useIsAuthenticated();
-  const { data: concerts, isLoading } = useSWR<Concert[]>("/concerts", fetcher);
-  const featuredConcerts = concerts?.slice(0, 3) || [];
+  const { data: concerts, isLoading } = useSWR<Concert[]>("/concerts", fetcher, {
+    fallbackData: initialConcerts,
+  });
+  
+  // If we have fallback data, it won't be "isLoading" initially 
+  const displayConcerts = concerts && concerts.length > 0 ? concerts : initialConcerts;
+  const featuredConcerts = displayConcerts.slice(0, 3);
 
   return (
     <div className="min-h-screen pt-16">
@@ -221,7 +230,7 @@ export function HomePage() {
             </Link>
           </div>
 
-          {isLoading ? (
+          {isLoading && !displayConcerts.length ? (
             <div className="flex flex-col gap-4">
               {[...Array(3)].map((_, i) => (
                 <div

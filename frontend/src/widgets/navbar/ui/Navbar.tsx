@@ -30,7 +30,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/shared/ui";
-import { useAuthStore, useIsAuthenticated, useIsAdmin } from "@/features/auth";
+import { useAuthStore } from "@/features/auth";
 import { ROUTES, APP_NAME } from "@/shared/config";
 import { cn } from "@/shared/lib";
 
@@ -40,10 +40,13 @@ export function Navbar() {
   const [isDark, setIsDark] = useState(false);
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
-  const isAuthenticated = useIsAuthenticated();
-  const isAdmin = useIsAdmin();
-  const user = useAuthStore((state) => state.user);
-  const logout = useAuthStore((state) => state.logout);
+  const authState = useAuthStore();
+  
+  // Prevent hydration mismatch by only using client state after mount
+  const isAuthenticated = mounted ? !!authState.user && !!authState.token : false;
+  const isAdmin = mounted ? authState.user?.role === "admin" : false;
+  const user = mounted ? authState.user : null;
+  const logout = authState.logout;
 
   // Handle scroll for floating navbar effect
   useEffect(() => {
